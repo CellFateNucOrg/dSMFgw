@@ -29,5 +29,5 @@ source ./varSettings.sh
 let i=$SLURM_ARRAY_TASK_ID-1
 
 # do QC and map 
-./alnBwaMeth.sh $seqDate ${sampleNames[$i]} $genomeFile $SLURM_CPUS_PER_TASK
+./alnBwaMeth.sh ${sampleNames[$i]} $SLURM_CPUS_PER_TASK
 
