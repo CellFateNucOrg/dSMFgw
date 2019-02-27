@@ -12,7 +12,8 @@ genomefile=${HOME}/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.f
 # path to trimmomatic program
 trimmomaticDIR='/software/UHTS/Analysis/trimmomatic/0.36/bin'
 # path to trimmomatic adaptor file
-trimAdaptorFile='/software/UHTS/Analysis/trimmomatic/0.36/bin/adaptors/TruSeq2-PE.fa'
+trimAdapterFile='./TruSeq_2-3_PE.fa'
+#trimAdapterFile='/software/UHTS/Analysis/trimmomatic/0.36/bin/adapters/TruSeq2-PE.fa'
 #trimmomaticDIR := ${HOME}/Trimmomatic-0.36
 #trimAdapterFile := ${trimmomaticDIR}/adapters/TruSeq_2-3_PE.fa
 
@@ -25,4 +26,4 @@ seqDate="20190206"
 
 ########## don't edit below this line ###############
 
-export NUMSAMPLES=${#sampleNames[@]}
+#export NUMSAMPLES=${#sampleNames[@]}
