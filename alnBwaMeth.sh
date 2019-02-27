@@ -18,6 +18,9 @@ numThreads=$2
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
 
+if [[ ! trimmed ]] 
+then
+
 #######################################################
 ## get initial read stats                            ##
 #######################################################
@@ -68,6 +71,8 @@ java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
+fi # end trimmed brackets
+
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
@@ -75,7 +80,7 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 source activate bwaMeth
 	
 # convert and index genome file for bwameth alignment
-if [[ ! -f ${genomefile}.bwameth.ct ]];
+if [[ ! -f ${genomefile}.bwameth.c2t ]]
 then
 	${BWAMETH} index ${genomefile}
 fi
