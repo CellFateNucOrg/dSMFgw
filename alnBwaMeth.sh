@@ -71,7 +71,7 @@ java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
+#fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -106,9 +106,10 @@ samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/repor
 samtools stats aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_stats.txt
 	
 #samtools view -cF 0x100 accepted_hits.bam
+fi # end trimmed brackets
 
 # Get insert size statistics and plots with picard and qualimap (set path to $QUALIMAP in .bash_profile)
-java -Xms1g -Xmx5g -jar picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.sorted.bam \
+java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.sorted.bam \
   O=fastQC/aln/prefilt/${bname}_${seqDate}_picard_insert_size_metrics.txt \
   H=fastQC/aln/prefilt/${bname}_${seqDate}_picard_insert_size_histogram.pdf
 
@@ -121,7 +122,7 @@ qualimap bamqc -bam aln/${bname}_${seqDate}.sorted.bam -c -outdir fastQC/aln/pre
 
 # mark duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 mkdir -p fastQC/aln/postfilt
-java -Xmx5g -jar picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.sorted.bam O=aln/${bname}_${seqDate}.dup.bam M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt
+java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.sorted.bam O=aln/${bname}_${seqDate}.dup.bam M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt
 
 # 	remove mitochondrial reads
 samtools view -q 30 -F 1804 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
@@ -140,7 +141,7 @@ samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/repot_
 samtools stats aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_stats.txt 
 
 # Get insert size statistics and plots with picard and qualimap post-filtering
-java -Xms1g -Xmx5g -jar picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt.bam \
+java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt.bam \
   O=fastQC/aln/postfilt/${bname}_${seqDate}_picard_insert_size_metrics.txt \
   H=fastQC/aln/postfilt/${bname}_${seqDate}_picard_insert_size_histogram.pdf
 
