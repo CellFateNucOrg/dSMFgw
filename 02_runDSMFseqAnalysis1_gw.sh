@@ -10,5 +10,7 @@
 module add vital-it
 module load R/3.5.1
 
-R CMD BATCH --no-save --no-restore dSMFseqAnalysis1_gw_aln.R
+source ./varSettings.sh
+
+Rscript dSMFseqAnalysis1_gw_aln.R ${genomefile}
 

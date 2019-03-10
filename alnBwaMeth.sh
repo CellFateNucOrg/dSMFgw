@@ -162,3 +162,10 @@ echo "min\tmax\tmedian\tmean" > fastQC/aln/postfilt/${bname}_${seqDate}_depthSta
 	#echo "${depthStats}" >> $@
 
 
+#######################################################
+## index bam files for QuasR input                   ##
+#######################################################
+
+samtools index aln/${bname}_${seqDate}.filt.bam
+
+

@@ -37,7 +37,8 @@ library(tidyr)
 library(ggpubr)
 
 # also require BSgenome packages that are loaded in the variableSettings.R file
-library("BSgenome.Celegans.UCSC.ce11")
+#library("BSgenome.Celegans.UCSC.ce11")
+
 
 # collect citations for packages used
 packageBib<-toBibtex(c(citation("QuasR"),
@@ -55,11 +56,20 @@ packageBib<-toBibtex(c(citation("QuasR"),
 
 source('./R/dSMF_auxiliaryFunctions.R')
 source('./R/variableSettings.R')
+genome="/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
+
+#modify the UCSC object to have same chr numbers as Wormbase genome fasta file
+seqnames(Celegans)<-gsub("chr", "", seqnames(Celegans))
+seqnames(Celegans)<-gsub("M", "MtDNA", seqnames(Celegans))
+
 
 ##############
 # Variables
 ##############
 
+args = commandArgs(trailingOnly=TRUE)
+genome=args[1]
+print(genome)
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
 # the script. the variableSettings_example.R file downloaded from the repo should be correctly
 # filled out and saved without the _example extension.
@@ -84,9 +94,6 @@ if (!dir.exists(paste0(path,"/csv"))){  # for various summary tables of informat
 if (!dir.exists(paste0(path,"/rds"))){
   dir.create(paste0(path,"/rds"))
 }
-if (!dir.exists(paste0(path,"/bigwig"))){
-  dir.create(paste0(path,"/bigwig"))
-}
 
 
 ###############################################################################################
@@ -96,7 +103,7 @@ if (!dir.exists(paste0(path,"/bigwig"))){
 cluObj=makeCluster(threadNum)
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -300,11 +307,6 @@ ggcorr(as.data.frame(1-as.matrix(mcols(methFreq_gr[,-typeColumn]))),
        label_size = 8, label_color = "white",label_round=2, name="rho")
 dev.off()
 
-## make .bigwig files of dSMF data
-#lapply(paste0(samples,"_M"),function(i){
-#  grToBw(methFreq_gr,names(mcols(methFreq_gr[,i])),
-#          paste(path,'/bigwig/gwdSMF_DE_',i,'.bw',sep=''))
-#})
 
 
 
@@ -319,7 +321,7 @@ dev.off()
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -490,7 +492,7 @@ for (i in allAmp2plot) {
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -569,7 +571,7 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_amp.pdf"),plot=ml,device="pdf",
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -660,7 +662,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -735,7 +737,7 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_hc.pdf"),plot=ml,device="pdf",
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
@@ -785,7 +787,7 @@ saveRDS(allSampleCmats,paste0(path,"/methylation_calls/allSampleCmats_TSS_lc.rds
 
 allSampleGCmats<-list()
 for (i in seq_along(samples)) {
-  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=Celegans,
+  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=genome,
                                               conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=F) # for Amplicon data use destrand=F !!!
 }
 saveRDS(allSampleGCmats,paste0(path,"/methylation_calls/allSampleCGmatGCmat_TSS_lc.rds"))
@@ -826,7 +828,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeName,
+                genome=genome,
                 paired="fr",
                 bisulfite="dir",
                 projectName=projectName,
