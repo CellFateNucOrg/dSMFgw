@@ -103,10 +103,9 @@ rm aln/${bname}_${seqDate}.sam
 # 	get alignment stats
 mkdir -p fastQC/aln/prefilt
 samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstats.txt
-samtools stats aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_stats.txt
+#samtools stats aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_stats.txt
 	
 #samtools view -cF 0x100 accepted_hits.bam
-fi # end trimmed brackets
 
 # Get insert size statistics and plots with picard and qualimap (set path to $QUALIMAP in .bash_profile)
 java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.sorted.bam \
@@ -116,6 +115,9 @@ java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/$
 qualimap bamqc -bam aln/${bname}_${seqDate}.sorted.bam -c -outdir fastQC/aln/prefilt -outfile ${bname}_${seqDate}_report_qualimap.pdf -outformat PDF
 
 
+
+fi # end trimmed brackets
+
 #######################################################
 ## Mark duplicates and filter reads. Then redo stats ##
 #######################################################
@@ -124,21 +126,33 @@ qualimap bamqc -bam aln/${bname}_${seqDate}.sorted.bam -c -outdir fastQC/aln/pre
 mkdir -p fastQC/aln/postfilt
 java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.sorted.bam O=aln/${bname}_${seqDate}.dup.bam M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt
 
-# 	remove mitochondrial reads
-samtools view -q 30 -F 1804 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
-rm aln/${bname}_${seqDate}.dup.bam
 
-# NOTE: sam flag 1804 means the following:
-# read unmapped
-# mate unmapped
-# not primary alignment
-# read fails platform/vendor quality checks
-# read is PCR or optical duplicate
+# take reads only in the right orientation
+samtools view -q 30 -F 3852 -f 97 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.fr1.bam
+samtools view -q 30 -F 3852 -f 145 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.fr2.bam
+samtools view -q 30 -F 3852 -f 81 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.rf1.bam
+samtools view -q 30 -F 3852 -f 161 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.rf2.bam
+
+listBams=( aln/${bname}_${seqDate}.fr1.bam aln/${bname}_${seqDate}.fr2.bam aln/${bname}_${seqDate}.rf1.bam aln/${bname}_${seqDate}.rf2.bam )
+
+samtools merge -f aln/${bname}_${seqDate}.filt.bam  ${listBams[@]}
+
+# remove duplicate reads
+#samtools view -q 30 -F 3852 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
+#rm aln/${bname}_${seqDate}.dup.bam
+rm ${listBams[@]}
+
+# NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
+# 4    read unmapped
+# 8    mate unmapped
+# 256  not primary alignment
+# 512  read fails platform/vendor quality checks
+# 1024 read is PCR or optical duplicate
+# 2048 Supplementary alignment
 
 # 	get alignment stats again post-filtering
-samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/repot_aln/${bname}_${seqDate}_flagstats.txt
-
-samtools stats aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_stats.txt 
+samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_aln/${bname}_${seqDate}_flagstats.txt
+#samtools stats aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_stats.txt 
 
 # Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt.bam \
