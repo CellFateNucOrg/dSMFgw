@@ -54,6 +54,8 @@ call_context_methylation<-function(meth_gr,c0,genome=genome){
     fastaFlag=FALSE
   } else if (is.character(genome)){
     genome<-readDNAStringSet(genome)
+    #strip off anything after a space to deal with additional fasta header info
+    names(genome)<-gsub("[[:space:]].*$","",names(genome),perl=F)
     fastaFlag=TRUE
   } else {
     print("genome must be BSgenome or path to fasta file")

@@ -71,11 +71,12 @@ java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-#fi # end trimmed brackets
+fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
+# consider fastx-collapser to get rid of duplicates (works on SE reads!) http://hannonlab.cshl.edu/fastx_toolkit/
 
 source activate bwaMeth
 	
@@ -91,41 +92,57 @@ ${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seq
 
 source deactivate
 
-# use samtools to convert to bam and sort
-samtools view -u aln/${bname}_${seqDate}.sam | samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads}
-rm aln/${bname}_${seqDate}.sam
+
+# use samtools to convert to bam and sort by name for picard tools duplicate marking
+samtools sort -n -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
+#rm aln/${bname}_${seqDate}.sam
 
 
 #######################################################
 ## Get alignment stats                               ##
 #######################################################
 
-# 	get alignment stats
+# get alignment stats
 mkdir -p fastQC/aln/prefilt
-samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstats.txt
-#samtools stats aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_stats.txt
-	
-#samtools view -cF 0x100 accepted_hits.bam
-
-# Get insert size statistics and plots with picard and qualimap (set path to $QUALIMAP in .bash_profile)
-java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.sorted.bam \
-  O=fastQC/aln/prefilt/${bname}_${seqDate}_picard_insert_size_metrics.txt \
-  H=fastQC/aln/prefilt/${bname}_${seqDate}_picard_insert_size_histogram.pdf
-
-qualimap bamqc -bam aln/${bname}_${seqDate}.sorted.bam -c -outdir fastQC/aln/prefilt -outfile ${bname}_${seqDate}_report_qualimap.pdf -outformat PDF
+samtools sort -@ ${numThreads} aln/${bname}_${seqDate}.bam | samtools flagstat  > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_aln.txt
 
 
-
-fi # end trimmed brackets
 
 #######################################################
-## Mark duplicates and filter reads. Then redo stats ##
+## Remove duplicates with Picard                     ##
 #######################################################
 
 # mark duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
-mkdir -p fastQC/aln/postfilt
-java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.sorted.bam O=aln/${bname}_${seqDate}.dup.bam M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt
+# Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
+# file must be querysorted (by name) not by coordinate. Consider using SortSam from Picard if these are not being flagged
+java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates \
+        I=aln/${bname}_${seqDate}.sorted.bam \
+        O=aln/${bname}_${seqDate}.dup.bam \
+        M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt \
+        REMOVE_DUPLICATES=true
 
+# if you wish to see the duplicate tags using the following option instead of REMOVE_DUPLICATES
+# The tags will go in the DT field
+#--TAGGING_POLICY=All
+# the you would have to use samtools view -F 1024
+
+
+#######################################################
+## Sort and get alignment stats                      ##
+#######################################################
+
+# sort by position
+samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam
+
+# get alignment stats
+mkdir -p fastQC/aln/prefilt
+samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_noDup.txt
+	
+
+
+#######################################################
+## Filter by read orientation                        ##
+#######################################################
 
 # take reads only in the right orientation
 samtools view -q 30 -F 3852 -f 97 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.fr1.bam
@@ -140,7 +157,7 @@ samtools merge -f aln/${bname}_${seqDate}.filt.bam  ${listBams[@]}
 # remove duplicate reads
 #samtools view -q 30 -F 3852 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
 #rm aln/${bname}_${seqDate}.dup.bam
-rm ${listBams[@]}
+#rm ${listBams[@]}
 
 # NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
 # 4    read unmapped
@@ -150,9 +167,16 @@ rm ${listBams[@]}
 # 1024 read is PCR or optical duplicate
 # 2048 Supplementary alignment
 
+
+
+#######################################################
+## Get stats on filtered reads                       ##
+#######################################################
+
+
+mkdir -p fastQC/aln/postfilt
 # 	get alignment stats again post-filtering
-samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_aln/${bname}_${seqDate}_flagstats.txt
-#samtools stats aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_stats.txt 
+samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_flagstat_filt.txt
 
 # Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx5g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt.bam \
@@ -176,6 +200,7 @@ echo "min\tmax\tmedian\tmean" > fastQC/aln/postfilt/${bname}_${seqDate}_depthSta
 	#echo "${depthStats}" >> $@
 
 
+
 #######################################################
 ## index bam files for QuasR input                   ##
 #######################################################
@@ -183,3 +208,14 @@ echo "min\tmax\tmedian\tmean" > fastQC/aln/postfilt/${bname}_${seqDate}_depthSta
 samtools index aln/${bname}_${seqDate}.filt.bam
 
 
+
+#######################################################
+## clip overlap between reads                        ##
+#######################################################
+
+$BAMUTILDIR clipOverlap --in aln/${bname}_${seqDate}.filt.bam --out aln/${bname}_${seqDate}.noOL.bam  --stats  2>&1 fastQC/aln/clipOl_${bname}_${seqDate}.txt
+
+# get alignment stats again post-filtering
+samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_flagstat_noOL.txt
+
+samtools index aln/${bname}_${seqDate}.noOL.bam
