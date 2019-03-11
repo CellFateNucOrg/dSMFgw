@@ -71,7 +71,6 @@ java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -94,7 +93,7 @@ source deactivate
 
 
 # use samtools to convert to bam and sort by name for picard tools duplicate marking
-samtools sort -n -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
+#samtools sort -n -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
 #rm aln/${bname}_${seqDate}.sam
 
 
@@ -104,20 +103,30 @@ samtools sort -n -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${
 
 # get alignment stats
 mkdir -p fastQC/aln/prefilt
-samtools sort -@ ${numThreads} aln/${bname}_${seqDate}.bam | samtools flagstat  > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_aln.txt
+samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
+samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_aln.txt
+#rm samtools aln/${bname}_${seqDate}.sort.bam
 
 
+fi # end trimmed brackets
 
 #######################################################
 ## Remove duplicates with Picard                     ##
 #######################################################
+#samtools view -b -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
+
+java -Xmx5g -jar ${picardDIR}/picard.jar SortSam \
+      I=aln/${bname}_${seqDate}.sort.bam \
+      O=aln/${bname}_${seqDate}.qsort.bam \
+      SORT_ORDER=queryname
+
 
 # mark duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 # Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
 # file must be querysorted (by name) not by coordinate. Consider using SortSam from Picard if these are not being flagged
 java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates \
-        I=aln/${bname}_${seqDate}.sorted.bam \
-        O=aln/${bname}_${seqDate}.dup.bam \
+        I=aln/${bname}_${seqDate}.qsort.bam \
+        O=aln/${bname}_${seqDate}.noDup.bam \
         M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt \
         REMOVE_DUPLICATES=true
 
@@ -132,12 +141,13 @@ java -Xmx5g -jar ${picardDIR}/picard.jar MarkDuplicates \
 #######################################################
 
 # sort by position
-samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam
+samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads} aln/${bname}_${seqDate}.noDup.bam
 
 # get alignment stats
 mkdir -p fastQC/aln/prefilt
 samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_noDup.txt
 	
+#rm aln/${bname}_${seqDate}.noDup.bam
 
 
 #######################################################
@@ -145,10 +155,10 @@ samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/repor
 #######################################################
 
 # take reads only in the right orientation
-samtools view -q 30 -F 3852 -f 97 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.fr1.bam
-samtools view -q 30 -F 3852 -f 145 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.fr2.bam
-samtools view -q 30 -F 3852 -f 81 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.rf1.bam
-samtools view -q 30 -F 3852 -f 161 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.rf2.bam
+samtools view -q 30 -F 3852 -f 97 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.fr1.bam
+samtools view -q 30 -F 3852 -f 145 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.fr2.bam
+samtools view -q 30 -F 3852 -f 81 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.rf1.bam
+samtools view -q 30 -F 3852 -f 161 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.rf2.bam
 
 listBams=( aln/${bname}_${seqDate}.fr1.bam aln/${bname}_${seqDate}.fr2.bam aln/${bname}_${seqDate}.rf1.bam aln/${bname}_${seqDate}.rf2.bam )
 
@@ -156,7 +166,6 @@ samtools merge -f aln/${bname}_${seqDate}.filt.bam  ${listBams[@]}
 
 # remove duplicate reads
 #samtools view -q 30 -F 3852 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
-#rm aln/${bname}_${seqDate}.dup.bam
 #rm ${listBams[@]}
 
 # NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
