@@ -18,11 +18,11 @@ trimAdapterFile='./TruSeq_2-3_PE.fa'
 #trimAdapterFile := ${trimmomaticDIR}/adapters/TruSeq_2-3_PE.fa
 BWAMETHDIR=/home/ubelix/izb/semple/mySoftware/bwa-meth-master
 BAMUTILDIR=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
-
+FASTUNIQ=/home/ubelix/izb/semple/mySoftware/FastUniq/source/fastuniq
 
 picardDIR='/software/UHTS/Analysis/picard-tools/2.18.11/bin'
 
-trimmed=TRUE
+trimmed=FALSE
 
 #start of the fastq filename that contains the sample name and is common between R1 and R2
 sampleNames=( dS16N2gw dS20N2gw )

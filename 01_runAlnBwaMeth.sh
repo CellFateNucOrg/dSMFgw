@@ -20,6 +20,9 @@ module add UHTS/Analysis/samtools/1.8;
 module add UHTS/Analysis/picard-tools/2.18.11;
 module add UHTS/Quality_control/qualimap/2.2.1;
 module add UHTS/Aligner/bwa/0.7.17;
+module add UHTS/Analysis/fastx_toolkit/0.0.13.2;
+module add UHTS/Analysis/FLASH2/2.2.00;
+
 #source activate bwaMeth
 
 # read in the run specific settings

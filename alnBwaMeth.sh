@@ -51,27 +51,50 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
-
-#######################################################
-## quality trim reads with Trimmomatic               ##
-#######################################################
-
-#graphical parameter for bash shell
-export DISPLAY=:0
-
-#use trimmomatic to trim
-mkdir -p trim
-mkdir -p fastQC/trim
-echo $numThreads
-echo $trimmomaticDIR
-echo $trimAdapterFile
-
-java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_forward_unpaired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz trim/${bname}_${seqDate}_reverse_unpaired.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
-
-# redo fastQC on trimmed reads	
-fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
-
 fi # end trimmed brackets
+
+#######################################################
+## remove duplicate fastq reads                      ##
+#######################################################
+#bname=dS20N2gw
+#seqDate=20190206
+mkdir -p uniq
+gunzip cutadapt/${bname}_${seqDate}_R?.fastq.gz
+ls cutadapt/${bname}_${seqDate}_R?.fastq > cutadapt/${bname}_${seqDate}.fofn
+$FASTUNIQ -i cutadapt/${bname}_${seqDate}.fofn -t q -o uniq/${bname}_${seqDate}_R1.fastq -p uniq/${bname}_${seqDate}_R2.fastq
+
+# recompress the files
+#gzip cutadapt/${bname}_${seqDate}_R?.fastq
+gzip uniq/${bname}_${seqDate}_R?.fastq
+
+#redo fastQC on uniq reads
+mkdir -p fastQC/uniq
+fastqc uniq/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/uniq
+
+#######################################################
+## merge overlapping reads                           ##
+#######################################################
+
+flash2 -O -r 150 -f 300 -s 30 -M 100 -o ${bname}_${seqDate} -d cutadapt -z uniq/${bname}_${seqDate}_R1.fastq.gz uniq/${bname}_${seqDate}_R2.fastq.gz 2>&1 | tee fastQC/uniq/flash_${bname}_${seqDate}.log
+
+##graphical parameter for bash shell
+##export DISPLAY=:0
+#
+##use trimmomatic to trim
+#mkdir -p trim
+#mkdir -p fastQC/trim
+#echo $numThreads
+#echo $trimmomaticDIR
+#echo $trimAdapterFile
+#
+#java -Xms1g -Xmx5g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_forward_unpaired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz trim/${bname}_${seqDate}_reverse_unpaired.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
+#
+## redo fastQC on trimmed reads	
+#fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
+
+
+if [[ ! TRUE  ]] 
+then
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -219,3 +242,6 @@ $BAMUTILDIR clipOverlap --in aln/${bname}_${seqDate}.filt.bam --out aln/${bname}
 samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_flagstat_noOL.txt
 
 samtools index aln/${bname}_${seqDate}.noOL.bam
+
+
+fi
