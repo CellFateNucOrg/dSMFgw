@@ -230,7 +230,7 @@ fi # end trimmed brackets
 #
 #samtools sort -o aln/${bname}_${seqDate}.filt1.bam -@ ${numThreads} aln/${bname}_${seqDate}.filt.bam
 #
-${BAMUTILDIR} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats  > fastQC/aln/clipOl_${bname}_${seqDate}.txt
+${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats  > fastQC/aln/clipOl_${bname}_${seqDate}.txt
 #
 #
 #
