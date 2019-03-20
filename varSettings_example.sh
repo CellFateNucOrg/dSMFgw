@@ -4,8 +4,9 @@
 # to varSettings.sh, then change verSettings.sh as necessary.
 
 
-genomefile=${HOME}/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa
-#genomefile:= ${HOME}/Documents/MeisterLab/GenomeVer/sequence/c_elegans.PRJNA13758.WS250.genomic.fa
+genomefile=${HOME}/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa  # on ubelix
+#genomefile=/data/projects/p025/Jenny/genomeVer/ws265/c_elegans.PRJNA13758.WS265.genomic.fa  # on bioinformatics cluster
+#genomefile= ${HOME}/Documents/MeisterLab/GenomeVer/sequence/c_elegans.PRJNA13758.WS250.genomic.fa # local
 
 # path to cutadapt program
 #cutadaptPath='/software/UHTS/Quality_control/cutadapt/1.13/bin/cutadapt'
@@ -16,8 +17,11 @@ trimAdapterFile='./TruSeq_2-3_PE.fa'
 #trimAdapterFile='/software/UHTS/Analysis/trimmomatic/0.36/bin/adapters/TruSeq2-PE.fa'
 #trimmomaticDIR := ${HOME}/Trimmomatic-0.36
 #trimAdapterFile := ${trimmomaticDIR}/adapters/TruSeq_2-3_PE.fa
-BWAMETHDIR=/home/ubelix/izb/semple/mySoftware/bwa-meth-master
-BAMUTILDIR=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
+
+# install bwa-meth and bamutil programmes and then set the following variables in the ~/.bashrc 
+# using the path to the installation location. e.g.
+#export BWAMETHDIR=/home/ubelix/izb/semple/mySoftware/bwa-meth-master
+#export BAMUTIL=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
 
 
 picardDIR='/software/UHTS/Analysis/picard-tools/2.18.11/bin'
