@@ -1,0 +1,21 @@
+{
+  "filters" : [
+    { "id" : "mappedUniquelyToSameChr",
+      "isMapped" : "true",
+      "isMateMapped" : "true",
+      "mapQuality" : ">=30",
+      "isDuplicate" : "false",
+      "isFailedQC"  : "false",
+      "isPrimaryAlignment" : "true"
+    },
+    { "id" : "frOrientation",
+      "isReverseStand" : "false",
+      "isMateReverseStrand" : "true"
+    },
+    { "id" : "rfOrientation",
+      "isReverseStrand" : "true",
+      "isMateReverseStrand" : "false"
+    }
+  ],
+  "rule" : "mappedUniquelyToSameChr & (frOrientation | rfOrientation)"
+}
