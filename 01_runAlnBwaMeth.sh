@@ -16,7 +16,7 @@ module add vital-it;
 module load R/3.5.1;
 module add UHTS/Quality_control/fastqc/0.11.5;      #fastqc
 module add UHTS/Quality_control/cutadapt/1.13;     #cutadapt
-#module add UHTS/Analysis/trimmomatic/0.36;
+module add UHTS/Analysis/trimmomatic/0.36;
 module add UHTS/Analysis/samtools/1.8;
 module add UHTS/Analysis/picard-tools/2.18.11;
 module add UHTS/Quality_control/qualimap/2.2.1;

@@ -56,13 +56,13 @@ fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt
 #export DISPLAY=:0
 
 #use trimmomatic to trim
-#mkdir -p trim
-#mkdir -p fastQC/trim
+mkdir -p trim
+mkdir -p fastQC/trim
 
-#java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_forward_unpaired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz trim/${bname}_${seqDate}_reverse_unpaired.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
+java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 # redo fastQC on trimmed reads	
-#fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
+fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
 fi # end trimmed brackets
 
@@ -82,8 +82,8 @@ fi
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-#${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz > aln/${bname}_${seqDate}.sam
-${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
+#${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 source deactivate
 
@@ -150,8 +150,9 @@ bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDa
 # keep only reads that map to the same chromosome
 # write header to file temporarily
 samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
-# extract rows where the 7th column has "=" (same chromosome) and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
+# extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
+# and combine with header into a new bam file.
+samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
 rm ${bname}_${seqDate}.header.sam
 
 #rm aln/${bname}_${seqDate}.sorted.bam
