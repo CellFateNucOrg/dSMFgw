@@ -1,0 +1,13 @@
+aln/
+plots/
+methylation_calls/
+csv/
+cutadapt/
+fastQC/
+trim/
+dSMFseqAnalysis_2callCs_fromCluster.R
+*.sam
+*.txt
+varSettings.sh
+slurm*.out
+
