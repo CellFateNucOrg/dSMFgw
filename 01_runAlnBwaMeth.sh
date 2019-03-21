@@ -1,8 +1,8 @@
 #! /usr/bin/bash
 
 ## Allocate resources
-#SBATCH --time=0-01:00:00
-#SBATCH --array=1
+#SBATCH --time=2-00:00:00
+#SBATCH --array=1-2
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
@@ -16,12 +16,12 @@ module add vital-it;
 module load R/3.5.1;
 module add UHTS/Quality_control/fastqc/0.11.5;      #fastqc
 module add UHTS/Quality_control/cutadapt/1.13;     #cutadapt
-module add UHTS/Analysis/trimmomatic/0.36;
+#module add UHTS/Analysis/trimmomatic/0.36;
 module add UHTS/Analysis/samtools/1.8;
 module add UHTS/Analysis/picard-tools/2.18.11;
 module add UHTS/Quality_control/qualimap/2.2.1;
 module add UHTS/Aligner/bwa/0.7.17;
-module add UHTS/Analysis/BBMap/37.82;
+#module add UHTS/Analysis/BBMap/37.82;
 module add UHTS/Analysis/bamtools/2.4.1;
 #source activate bwaMeth
 

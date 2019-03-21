@@ -26,13 +26,13 @@ trimAdapterFile='./TruSeq_2-3_PE.fa'
 
 picardDIR='/software/UHTS/Analysis/picard-tools/2.18.11/bin'
 
-trimmed=TRUE
+trimmed=FALSE
 
 #start of the fastq filename that contains the sample name and is common between R1 and R2
 sampleNames=( dS16N2gw dS20N2gw )
 
 # date the sequencing was performed
-seqDate="20190206"
+seqDate="20190218"
 
 
 ########## don't edit below this line ###############

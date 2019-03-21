@@ -1,6 +1,6 @@
 #! /usr/bin/bash
 ## mapping dSMF-gw sequences with bwa-meth
-## required software: fastqc, cutadapt, trimmomatic, bwa-meth, samtools, picard, qualimap
+## required software: fastqc, cutadapt, trimmomatic, bwa-meth, samtools, picard, qualimap, bamutils, bamtools
 
 ###############################
 ########### VARIABLES #########
@@ -18,7 +18,8 @@ numThreads=$2
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
 
-if [[ ! $trimmed ]] 
+# setup up a conditional statement to avoid repeating already executed steps
+if [[ "$trimmed" = "FALSE" ]] 
 then
 
 #######################################################
@@ -28,12 +29,7 @@ then
 #run fastqc on sequences
 mkdir -p ./fastQC/rawData
 
-#for f in ${fileList[@]}:
-#do
-#	fastqc -t ${numThreads} $f -o ./fastQC/rawData
-#done
-
-fastqc ${fileList[@]} -o ./fastQC/rawData
+fastqc -t ${numThreads} ${fileList[@]} -o ./fastQC/rawData
 
 #######################################################
 ## trim adaptors with cutadapt                       ##
@@ -47,7 +43,7 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
                 ${fileList[@]} 
 
 
-#redo fastQC on trimmed reads
+#redo fastQC on cut reads
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
@@ -57,20 +53,18 @@ fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt
 #######################################################
 
 #graphical parameter for bash shell
-export DISPLAY=:0
+#export DISPLAY=:0
 
 #use trimmomatic to trim
-mkdir -p trim
-mkdir -p fastQC/trim
-echo $numThreads
-echo $trimmomaticDIR
-echo $trimAdapterFile
+#mkdir -p trim
+#mkdir -p fastQC/trim
 
-java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_forward_unpaired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz trim/${bname}_${seqDate}_reverse_unpaired.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
+#java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_forward_unpaired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz trim/${bname}_${seqDate}_reverse_unpaired.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> fastQC/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 # redo fastQC on trimmed reads	
-fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
+#fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
+fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -88,42 +82,41 @@ fi
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz > aln/${bname}_${seqDate}.sam
+#${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_forward_paired.fq.gz trim/${bname}_${seqDate}_reverse_paired.fq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 source deactivate
 
+# convert to bam file to save space
 samtools view -b -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
 rm aln/${bname}_${seqDate}.sam
 
-# use samtools to convert to bam and sort by name for picard tools duplicate marking
-#samtools sort -n -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
-#rm aln/${bname}_${seqDate}.sam
 
 
 #######################################################
 ## Get alignment stats                               ##
 #######################################################
 
-# get alignment stats
-#mkdir -p fastQC/aln/prefilt
-#samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
-#samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_aln.txt
-#rm samtools aln/${bname}_${seqDate}.sort.bam
+# get alignment stats (need to sort temporarily first)
+mkdir -p fastQC/aln
+samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
+samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
+rm samtools aln/${bname}_${seqDate}.sort.bam
 
 
 
 #######################################################
 ## Remove duplicates with Picard                     ##
 #######################################################
-#samtools view -b -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
 
+#sort by query name for duplicate removal
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate}.bam O=aln/${bname}_${seqDate}.qsort.bam SORT_ORDER=queryname TMP_DIR=${TMPDIR}
 
 
-# mark duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
+# remove duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 # Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
-# file must be querysorted (by name) not by coordinate. Consider using SortSam from Picard if these are not being flagged
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=fastQC/aln/postfilt/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=true ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
+# file must be querysorted (by name) not by coordinate. 
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=fastQC/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=true ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
 
 #-XX:ParallelGCThreads=${numThreads}
 
@@ -134,17 +127,16 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${
 
 
 #######################################################
-## Sort and get alignment stats                      ##
+## Sort and get stats                                ##
 #######################################################
 
 # sort by position
 samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads} aln/${bname}_${seqDate}.noDup.bam
 
 # get alignment stats
-mkdir -p fastQC/aln/prefilt
-samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/report_${bname}_${seqDate}_flagstat_noDup.txt
+samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/report_flagstat_2_${bname}_${seqDate}_noDup.txt
 	
-#rm aln/${bname}_${seqDate}.noDup.bam
+rm aln/${bname}_${seqDate}.noDup.bam
 
 
 
@@ -156,26 +148,15 @@ samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/prefilt/repor
 bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
 
 # keep only reads that map to the same chromosome
+# write header to file temporarily
 samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
+# extract rows where the 7th column has "=" (same chromosome) and combine with header into a new bam file.
 samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
 rm ${bname}_${seqDate}.header.sam
 
+#rm aln/${bname}_${seqDate}.sorted.bam
 
-fi # end trimmed brackets
-# take reads only in the right orientation
-#samtools view -q 30 -F 3852 -f 97 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.fr1.bam
-#samtools view -q 30 -F 3852 -f 145 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.fr2.bam
-#samtools view -q 30 -F 3852 -f 81 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.rf1.bam
-#samtools view -q 30 -F 3852 -f 161 -b aln/${bname}_${seqDate}.sorted.bam > aln/${bname}_${seqDate}.rf2.bam
-
-#listBams=( aln/${bname}_${seqDate}.fr1.bam aln/${bname}_${seqDate}.fr2.bam aln/${bname}_${seqDate}.rf1.bam aln/${bname}_${seqDate}.rf2.bam )
-
-#samtools merge -f aln/${bname}_${seqDate}.filt.bam  ${listBams[@]}
-
-# remove duplicate reads
-#samtools view -q 30 -F 3852 -b aln/${bname}_${seqDate}.dup.bam > aln/${bname}_${seqDate}.filt.bam
-#rm ${listBams[@]}
-
+# for simple samtools filtering:
 # NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
 # 4    read unmapped
 # 8    mate unmapped
@@ -189,52 +170,62 @@ fi # end trimmed brackets
 ########################################################
 ### Get stats on filtered reads                       ##
 ########################################################
-#
-#
-#mkdir -p fastQC/aln/postfilt
-## 	get alignment stats again post-filtering
-#samtools flagstat aln/${bname}_${seqDate}.filt.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_flagstat_filt.txt
-#
+
+# get alignment stats again post-filtering
+samtools flagstat aln/${bname}_${seqDate}.filt2.bam  > fastQC/aln/report_flagstat_3_${bname}_${seqDate}_filt2.txt
+samtools flagstat aln/${bname}_${seqDate}.filt3.bam  > fastQC/aln/report_flagstat_4_${bname}_${seqDate}_filt3.txt
+
 ## Get insert size statistics and plots with picard and qualimap post-filtering
-#java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt.bam O=fastQC/aln/postfilt/${bname}_${seqDate}_picard_insert_size_metrics.txt H=fastQC/aln/postfilt/${bname}_${seqDate}_picard_insert_size_histogram.pdf
-#
-#qualimap bamqc -bam aln/${bname}_${seqDate}.filt.bam -c -outdir fastQC/aln/postfilt -outfile ${bname}_${seqDate}_report_qualimap.pdf -outformat PDF
-#
-#
-#
-########################################################
-### get median coverage 				     ##
-########################################################
-#
-#samtools depth -a aln/${bname}_${seqDate}.filt.bam | cut -f3  > fastQC/aln/postfilt/${bname}_${seqDate}_depthCol.txt
-#
-#echo "min\tmax\tmedian\tmean" > fastQC/aln/postfilt/${bname}_${seqDate}_depthStats.txt
-#./R/mmmm.r < fastQC/aln/postfilt/${bname}_${seqDate}_depthCol.txt >> fastQC/aln/postfilt/${bname}_${seqDate}_depthStats.txt
-#	#depthStats=`./R/mmmm.r < $^`
-#	#echo ${depthStats}
-#	#echo "${depthStats}" >> $@
-#
-#
-#
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt2.bam O=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_histogram.pdf
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
+
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
+
+#rm aln/${bname}_${seqDate}.filt2.bam
+
+
 ########################################################
 ### index bam files for QuasR input                   ##
 ########################################################
-#
-#samtools index aln/${bname}_${seqDate}.filt.bam
-#
-#
-#
+
+samtools index aln/${bname}_${seqDate}.filt3.bam
+
+
 ########################################################
 ### clip overlap between reads                        ##
 ########################################################
-#
-#samtools sort -o aln/${bname}_${seqDate}.filt1.bam -@ ${numThreads} aln/${bname}_${seqDate}.filt.bam
-#
-${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats  > fastQC/aln/clipOl_${bname}_${seqDate}.txt
-#
-#
-#
-## get alignment stats again post-filtering
-#samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/postfilt/report_${bname}_${seqDate}_flagstat_noOL.txt
-#
-#samtools index aln/${bname}_${seqDate}.noOL.bam
+
+${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats &> fastQC/aln/clipOl_${bname}_${seqDate}.txt
+
+# index bam files for QuasR input
+samtools index aln/${bname}_${seqDate}.noOL.bam
+
+#rm aln/${bname}_${seqDate}.filt3.bam
+
+########################################################
+### Get stats on filtered reads                       ##
+########################################################
+
+# get alignment stats again post-filtering
+samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat_5_${bname}_${seqDate}_noOL.txt
+
+## Get insert size statistics and plots with picard and qualimap post-filtering
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
+
+qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
+
+
+########################################################
+### get median coverage                               ##
+########################################################
+
+samtools depth -a aln/${bname}_${seqDate}.noOL.bam | cut -f3  > fastQC/aln/${bname}_${seqDate}_depthCol.txt
+
+echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_depthStats.txt
+./R/mmmm.r < fastQC/aln/${bname}_${seqDate}_depthCol.txt >> fastQC/aln/${bname}_${seqDate}_depthStats.txt
+        #depthStats=`./R/mmmm.r < $^`
+        #echo ${depthStats}
+        #echo "${depthStats}" >> $@
+
+
