@@ -52,6 +52,7 @@ packageBib<-toBibtex(c(citation("QuasR"),
 #####################
 
 source('./R/dSMF_auxiliaryFunctions.R')
+source('./R/dSMF_bigwig.R')
 source('./R/variableSettings.R')
 
 
@@ -83,8 +84,8 @@ if (!dir.exists(paste0(path,"/methylation_calls"))){
 if (!dir.exists(paste0(path,"/csv"))){  # for various summary tables of information
   dir.create(paste0(path,"/csv"))
 }
-if (!dir.exists(paste0(path,"/rds"))){
-  dir.create(paste0(path,"/rds"))
+if (!dir.exists(paste0(path,"/bigwig"))){
+  dir.create(paste0(path,"/bigwig"))
 }
 
 
@@ -299,6 +300,37 @@ ggcorr(as.data.frame(1-as.matrix(mcols(methFreq_gr[,-typeColumn]))),
        label_size = 8, label_color = "white",label_round=2, name="rho")
 dev.off()
 
+
+###################################################
+# make bigwig tracks of data
+###################################################
+
+# reading in combined GC GC list
+#methFreq_gr<-readRDS(paste0(path,"/methylation_calls/dSMFproj_allCG-GC_gw_methFreq_gr.rds"))
+
+w=10 #winSize for smoothing
+
+if (GenomeInfoDb::seqlevelsStyle(methFreq_gr)!="UCSC") {
+  methFreq_gr_u<-wbToUcscGR(methFreq_gr)
+} else {
+  methFreq_gr_u<-methFreq_gr
+}
+
+dataCols<-names(mcols(methFreq_gr_u))[grep("_M$",names(mcols(methFreq_gr_u)))]
+
+dsmf_all<-methToDSMFgr(methFreq_gr_u,dataCols)
+
+# export raw data with no smoothing
+grToBw(dsmf_all,dataCols,bwPath=paste0(path,"/bigwig"),
+       filenamePrefix="rawDSMF_",
+       urlPrefixForUCSC="http://www.meister.izb.unibe.ch/ucsc/")
+
+#smoothe data
+smDSMF<-smootheGRdata(dsmf_all,dataCols,winSize=w,winStep=1)
+#export smoothed tracks
+grToBw(smDSMF,dataCols,bwPath=paste0(path,"/bigwig"),
+       filenamePrefix=paste0("w",w,"smDSMF_"),
+       urlPrefixForUCSC="http://www.meister.izb.unibe.ch/ucsc/")
 
 
 
