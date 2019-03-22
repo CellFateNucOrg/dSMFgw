@@ -101,7 +101,7 @@ rm aln/${bname}_${seqDate}.sam
 mkdir -p fastQC/aln
 samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
 samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
-rm samtools aln/${bname}_${seqDate}.sort.bam
+#rm aln/${bname}_${seqDate}.sort.bam
 
 
 

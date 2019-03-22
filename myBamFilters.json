@@ -1,6 +1,6 @@
 {
   "filters" : [
-    { "id" : "mappedUniquelyToSameChr",
+    { "id" : "mappedUniquely",
       "isMapped" : "true",
       "isMateMapped" : "true",
       "mapQuality" : ">=30",
@@ -17,5 +17,5 @@
       "isMateReverseStrand" : "false"
     }
   ],
-  "rule" : "mappedUniquelyToSameChr & (frOrientation | rfOrientation)"
+  "rule" : "((mappedUniquely & frOrientation) | (mappedUniquely & rfOrientation))"
 }
