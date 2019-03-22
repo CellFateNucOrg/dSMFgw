@@ -1,6 +1,6 @@
-# bwaMeth
+# dSMFgw
 
-Aligning dSMF reads with bwa-meth rather than QuasR.
+Pipeline for analysing genome-wide dSMF data. This pipeline aligns dSMF reads with bwa-meth rather than QuasR, as the quality and yield of the alignments are much better. Only the bam files are imported into QuasR for methylation calling.
 
 ## Installing bwa-meth
 
