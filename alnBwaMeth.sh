@@ -125,6 +125,7 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${
 #--TAGGING_POLICY=All
 # the you would have to use samtools view -F 1024
 
+rm aln/${bname}_${seqDate}.qsort.bam
 
 #######################################################
 ## Sort and get stats                                ##
@@ -229,4 +230,11 @@ echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_depthStats.txt
         #echo ${depthStats}
         #echo "${depthStats}" >> $@
 
+rm fastQC/aln/${bname}_${seqDate}_depthCol.txt
 
+
+########################################################
+### get multiqc report                                ##
+########################################################
+
+multiqc ./fastQC

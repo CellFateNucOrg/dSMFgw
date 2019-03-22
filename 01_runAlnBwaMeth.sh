@@ -23,6 +23,7 @@ module add UHTS/Quality_control/qualimap/2.2.1;
 module add UHTS/Aligner/bwa/0.7.17;
 #module add UHTS/Analysis/BBMap/37.82;
 module add UHTS/Analysis/bamtools/2.4.1;
+module add UHTS/Analysis/MultiQC/1.7;
 #source activate bwaMeth
 
 # read in the run specific settings
