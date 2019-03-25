@@ -73,8 +73,7 @@ genomeFile=args[1]
 ################
 
 #setup directory structure this to desired location of your alignments
-if (!dir.exists(paste0(path,"/plots"))) {:q
-
+if (!dir.exists(paste0(path,"/plots"))) {
   dir.create(paste0(path,"/plots"))
 }
 if (!dir.exists(paste0(path,"/txt"))) {
@@ -100,7 +99,7 @@ cluObj=makeCluster(threadNum)
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -349,7 +348,7 @@ grToBw(smDSMF,dataCols,bwPath=paste0(path,"/bigwig"),
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -520,7 +519,7 @@ for (i in allAmp2plot) {
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -599,7 +598,7 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_amp.pdf"),plot=ml,device="pdf",
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -690,7 +689,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -765,7 +764,7 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_hc.pdf"),plot=ml,device="pdf",
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -856,7 +855,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 
