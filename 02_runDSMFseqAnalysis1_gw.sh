@@ -9,7 +9,12 @@
 
 module add vital-it
 module load R/3.5.1
+module add UHTS/Analysis/MultiQC/1.7;
 
+# Collect various QC data produced by previous script together
+multiqc ./fastQC
+
+# Call methylation and do plots
 source ./varSettings.sh
 
 Rscript dSMFseqAnalysis1_gw_aln.R ${genomefile}

@@ -64,7 +64,7 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
+#fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -181,8 +181,11 @@ samtools flagstat aln/${bname}_${seqDate}.filt3.bam  > fastQC/aln/report_flagsta
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt2.bam O=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_histogram.pdf
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
 
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
+
+fi # end trimmed brackets
+
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
 
 #rm aln/${bname}_${seqDate}.filt2.bam
 
@@ -215,7 +218,7 @@ samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat
 ## Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
 
-qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
+qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
 
 
 ########################################################

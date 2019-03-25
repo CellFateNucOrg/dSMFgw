@@ -63,6 +63,7 @@ source('./R/variableSettings.R')
 
 args = commandArgs(trailingOnly=TRUE)
 genomeFile=args[1]
+#genomeFile="/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
 # the script. the variableSettings_example.R file downloaded from the repo should be correctly
 # filled out and saved without the _example extension.
@@ -72,7 +73,8 @@ genomeFile=args[1]
 ################
 
 #setup directory structure this to desired location of your alignments
-if (!dir.exists(paste0(path,"/plots"))) {
+if (!dir.exists(paste0(path,"/plots"))) {:q
+
   dir.create(paste0(path,"/plots"))
 }
 if (!dir.exists(paste0(path,"/txt"))) {
