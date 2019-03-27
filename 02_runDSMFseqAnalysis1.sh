@@ -17,5 +17,16 @@ multiqc ./fastQC
 # Call methylation and do plots
 source ./varSettings.sh
 
-Rscript dSMFseqAnalysis1_gw_aln.R ${genomefile}
+if [[ "$dataType" == gw ]]
+then
+	Rscript dSMFseqAnalysis1_gw_aln.R ${genomefile}
+	echo "processing genome wide library"
+elif [[ "$dataType" == amp ]]
+then
+	Rscript dSMFseqAnalysis1_amp_aln.R ${genomefile}
+	echo "processing amplicon library"
+else
+	echo "ERROR: dataType in varSettings.sh must be either "amp" (amplicon library) or "gw" (genome-wide library)"
+fi
+
 
