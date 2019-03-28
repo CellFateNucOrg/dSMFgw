@@ -1,7 +1,7 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="gw_dSMF"
+#SBATCH --job-name="dSMF_Ccall"
 #SBATCH --time=1-12:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all

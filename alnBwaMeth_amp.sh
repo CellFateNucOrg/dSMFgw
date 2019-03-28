@@ -254,6 +254,6 @@ then
 	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
 else
 	mkdir -p txt
-	echo -e "fileName\tsampleName" > txt/QuasR_Aligned.txt
+	echo -e "FileName\tSampleName" > txt/QuasR_Aligned.txt
 	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
 fi
