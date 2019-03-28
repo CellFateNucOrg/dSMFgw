@@ -63,6 +63,7 @@ source('./R/variableSettings.R')
 
 args = commandArgs(trailingOnly=TRUE)
 genomeFile=args[1]
+testGroup<-testGroups
 #genomeFile="/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
 # the script. the variableSettings_example.R file downloaded from the repo should be correctly
@@ -120,13 +121,13 @@ meth_gr <- qMeth(dSMFproj,mode="allC",clObj=cluObj)
 # without coverage.
 
 ## save as rds for future access
-saveRDS(meth_gr,paste0(path,'/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds'))
+saveRDS(meth_gr,paste0(path,"/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds"))
 
 ########################################################
 # plots of all C methylation coverage
 ########################################################
 
-#meth_gr<-readRDS(paste0(path,'/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds'))
+#meth_gr<-readRDS(paste0(path,"/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds"))
 
 # Make some histograms of overall C methylation in the genome
 pdf(paste0(path,"/plots/hist_allC_",dataType,"_coverage.pdf"),width=8,height=11,paper="a4")
@@ -347,7 +348,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	# point the QuasR project at BAM files from now on
 	cluObj=makeCluster(threadNum)
 	dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-	                genome=genomeName,
+	                genome=genomeFile,
 	                paired="fr",
 	                bisulfite="dir",
 	                projectName=projectName,

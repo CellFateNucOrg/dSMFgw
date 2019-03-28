@@ -2,7 +2,7 @@
 
 # number of threads you wish to use
 threadNum=4
-
+dataType=Sys.getenv("dataType")
 
 # default path is the project working directory (dSMFamplicon).
 # Note that rawData should be one level up from this location (../rawData)
@@ -12,7 +12,8 @@ path<-getwd()
 library("BSgenome.Celegans.UCSC.ce11")
 genome<-Celegans
 
-genomeVer="WS235"
+#genomeVer="WS235"
+genomeVer<-Sys.getenv("genomeVer")
 
 ucscToWbGR<-function(ucscGR) {
   wbGR<-ucscGR
