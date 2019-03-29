@@ -63,6 +63,8 @@ source('./R/variableSettings.R')
 
 args = commandArgs(trailingOnly=TRUE)
 genomeFile=args[1]
+testGroup<-testGroups
+print(testGroup)
 #genomeFile="/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
 # the script. the variableSettings_example.R file downloaded from the repo should be correctly
@@ -120,13 +122,13 @@ meth_gr <- qMeth(dSMFproj,mode="allC",clObj=cluObj)
 # without coverage.
 
 ## save as rds for future access
-saveRDS(meth_gr,paste0(path,'/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds'))
+saveRDS(meth_gr,paste0(path,"/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds"))
 
 ########################################################
 # plots of all C methylation coverage
 ########################################################
 
-#meth_gr<-readRDS(paste0(path,'/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds'))
+#meth_gr<-readRDS(paste0(path,"/methylation_calls/dSMFproj_allCs_",dataType,"_counts.rds"))
 
 # Make some histograms of overall C methylation in the genome
 pdf(paste0(path,"/plots/hist_allC_",dataType,"_coverage.pdf"),width=8,height=11,paper="a4")
@@ -347,7 +349,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	# point the QuasR project at BAM files from now on
 	cluObj=makeCluster(threadNum)
 	dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-	                genome=genomeName,
+	                genome=genomeFile,
 	                paired="fr",
 	                bisulfite="dir",
 	                projectName=projectName,
@@ -393,7 +395,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	
 	allSampleGCmats<-list()
 	for (i in seq_along(samples)) {
-	  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=amplicons, genome=Celegans,
+	  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=amplicons, genome=genome,
 	                     conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=T) # for Amplicon data use destrand=F !!!
 	}
 	saveRDS(allSampleGCmats,paste0(path,"/methylation_calls/allSampleCGmatGCmat.rds"))
@@ -485,6 +487,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	
 	allSampleMergedMats<-readRDS(paste0(path,"/methylation_calls/allSampleMergedMats.rds"))
 	allAmp2plot<-unique(unlist(lapply(allSampleMergedMats,function(x){names(x)})))
+	TSS<-ampTSS
 	
 	# plot single molecule matrices on their own
 	for (i in allAmp2plot) {
@@ -507,7 +510,11 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	    }
 	  }
 	  regionGR<-amplicons[match(i,amplicons$ID)]
-	  XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+	  if (genomeVer=="WS235") {
+	  	XorA<-ifelse(seqnames(regionGR)=="X","X","A")
+	  } else {
+	  	XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+	  }
 	  title<-paste0(i, ": ",seqnames(regionGR)," ",strand(regionGR),"ve strand")
 	  mp<-marrangeGrob(grobs=plotList,nrow=2,ncol=2,top=title)
 	  ggsave(paste0(path,"/plots/singleMoleculePlots/",XorA,"_",i,".png"),
@@ -536,7 +543,11 @@ if (dataType=="amp") { # only execute of it is amplicon data
 	    }
 	  }
 	  regionGR<-amplicons[match(i,amplicons$ID)]
-	  XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+	  if (genomeVer=="WS235") {
+                XorA<-ifelse(seqnames(regionGR)=="X","X","A")
+          } else {
+                XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+          }
 	  title<-paste0(i, ": ",seqnames(regionGR)," ",strand(regionGR),"ve strand")
 	  mp<-marrangeGrob(grobs=plotList,nrow=2,ncol=2,top=title)
 	  ggsave(paste0(path,"/plots/singleMoleculePlotsWithAvr/",XorA,"_",i,".png"),
@@ -582,7 +593,12 @@ samples<-dSMFproj@alignments$SampleName
 #######
 # Extract all C positions within each amplicon (getCmethMatrix function)
 #######
-winSize<-300
+if (dataType=="amp"){
+	winSize=500
+} else {
+	winSize=300
+}
+#winSize<-300
 TSS<-ampTSS
 tssWin<-TSS
 mcols(tssWin)$TSS<-start(TSS)
@@ -685,7 +701,11 @@ for (i in allAmp2plot) {
     }
   }
   regionGR<-tssWinRelCoord[match(i,tssWinRelCoord$ID)]
-  XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+  if (genomeVer=="WS235") {
+  	XorA<-ifelse(seqnames(regionGR)=="X","X","A")
+  } else {
+  	XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+  }  
   title<-paste0(i, ": ",seqnames(regionGR)," ",strand(regionGR),"ve strand")
   mp<-marrangeGrob(grobs=plotList,nrow=2,ncol=2,top=title)
   ggsave(paste0(path,"/plots/singleMoleculePlots/TSS_",XorA,"_",i,".png"),
@@ -715,7 +735,11 @@ for (i in allAmp2plot) {
     }
   }
   regionGR<-tssWinRelCoord[match(i,tssWinRelCoord$ID)]
-  XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+  if (genomeVer=="WS235") {
+        XorA<-ifelse(seqnames(regionGR)=="X","X","A")
+  } else {
+        XorA<-ifelse(seqnames(regionGR)=="chrX","X","A")
+  }  
   title<-paste0(i, ": ",seqnames(regionGR)," ",strand(regionGR),"ve strand")
   mp<-marrangeGrob(grobs=plotList,nrow=2,ncol=2,top=title)
   ggsave(paste0(path,"/plots/singleMoleculePlotsWithAvr/TSS_",XorA,"_",i,".png"),
