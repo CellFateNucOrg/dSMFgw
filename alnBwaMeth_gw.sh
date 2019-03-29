@@ -50,13 +50,14 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
+fi # end trimmed brackets
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
 #######################################################
 
 #graphical parameter for bash shell
-#export DISPLAY=:0
+export DISPLAY=:0
 
 #use trimmomatic to trim
 mkdir -p trim
@@ -67,7 +68,6 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
