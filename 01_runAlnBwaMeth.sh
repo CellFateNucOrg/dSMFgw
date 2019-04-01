@@ -2,11 +2,10 @@
 
 ## Allocate resources
 #SBATCH --time=3-00:00:00
-#SBATCH --array=1-8
-
+#SBATCH --array=1-2
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="bwaMeth_dSMF"
+#SBATCH --job-name="bismark_dSMF"
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=8G
@@ -20,7 +19,8 @@ module add UHTS/Analysis/trimmomatic/0.36;
 module add UHTS/Analysis/samtools/1.8;
 module add UHTS/Analysis/picard-tools/2.18.11;
 module add UHTS/Quality_control/qualimap/2.2.1;
-module add UHTS/Aligner/bwa/0.7.17;
+module add UHTS/Aligner/bowtie2/2.3.4.1;
+#module add UHTS/Aligner/bwa/0.7.17;
 #module add UHTS/Analysis/BBMap/37.82;
 module add UHTS/Analysis/bamtools/2.4.1;
 #module add UHTS/Analysis/MultiQC/1.7;
