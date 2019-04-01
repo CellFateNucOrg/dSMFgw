@@ -98,7 +98,7 @@ cluObj=makeCluster(threadNum)
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="dir",
+                bisulfite="undir",
                 projectName=projectName,
                 clObj=cluObj)
 

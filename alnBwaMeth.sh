@@ -48,6 +48,8 @@ mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
 
+fi # end trimmed brackets
+
 #######################################################
 ## quality trim reads with Trimmomatic               ##
 #######################################################
@@ -64,7 +66,6 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -101,7 +102,7 @@ rm aln/${bname}_${seqDate}.sam
 mkdir -p fastQC/aln
 samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
 samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
-rm samtools aln/${bname}_${seqDate}.sort.bam
+#rm aln/${bname}_${seqDate}.sort.bam
 
 
 
@@ -189,7 +190,8 @@ qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c -outdir fastQC/aln -out
 ########################################################
 ### index bam files for QuasR input                   ##
 ########################################################
-
+samtools index aln/${bname}_${seqDate}.sorted.bam
+samtools index aln/${bname}_${seqDate}.filt2.bam
 samtools index aln/${bname}_${seqDate}.filt3.bam
 
 
