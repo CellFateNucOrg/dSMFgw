@@ -1,8 +1,8 @@
 #! /usr/bin/bash
 
 ## Allocate resources
-#SBATCH --time=2-00:00:00
-#SBATCH --array=1-2
+#SBATCH --time=3-00:00:00
+#SBATCH --array=1-8
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
@@ -23,6 +23,7 @@ module add UHTS/Quality_control/qualimap/2.2.1;
 module add UHTS/Aligner/bwa/0.7.17;
 #module add UHTS/Analysis/BBMap/37.82;
 module add UHTS/Analysis/bamtools/2.4.1;
+#module add UHTS/Analysis/MultiQC/1.7;
 #source activate bwaMeth
 
 # read in the run specific settings
@@ -32,5 +33,14 @@ source ./varSettings.sh
 let i=$SLURM_ARRAY_TASK_ID-1
 
 # do QC and map 
-./alnBwaMeth.sh ${sampleNames[$i]} $SLURM_CPUS_PER_TASK
-
+if [[ "$dataType" == gw ]]
+then
+	./alnBwaMeth_gw.sh ${sampleNames[$i]} ${testGroups[$i]} $SLURM_CPUS_PER_TASK
+        echo "processing genome wide library"
+elif [[ "$dataType" == amp ]]
+then
+	./alnBwaMeth_amp.sh ${sampleNames[$i]} ${testGroups[$i]} $SLURM_CPUS_PER_TASK
+        echo "processing amplicon library"
+else
+        echo "ERROR: dataType in varSettings.sh must be either "amp" (amplicon library) or "gw" (genome-wide library)"
+fi

@@ -12,8 +12,11 @@ source ./varSettings.sh
 #the start of the basename of the fastq files
 bname=$1
 
+#the biological test group that you will later compare (used for preparing the QuasR input file)
+testGroup=$2
+
 # number of threads
-numThreads=$2
+numThreads=$3
 
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
@@ -47,7 +50,6 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
-
 fi # end trimmed brackets
 
 #######################################################
@@ -55,7 +57,7 @@ fi # end trimmed brackets
 #######################################################
 
 #graphical parameter for bash shell
-#export DISPLAY=:0
+export DISPLAY=:0
 
 #use trimmomatic to trim
 mkdir -p trim
@@ -117,7 +119,7 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate
 # remove duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 # Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
 # file must be querysorted (by name) not by coordinate. 
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=fastQC/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=true ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=fastQC/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=false REMOVE_SEQUENCING_DUPLICATES=true  ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
 
 #-XX:ParallelGCThreads=${numThreads}
 
@@ -126,6 +128,7 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${
 #--TAGGING_POLICY=All
 # the you would have to use samtools view -F 1024
 
+rm aln/${bname}_${seqDate}.qsort.bam
 
 #######################################################
 ## Sort and get stats                                ##
@@ -181,8 +184,11 @@ samtools flagstat aln/${bname}_${seqDate}.filt3.bam  > fastQC/aln/report_flagsta
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt2.bam O=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_histogram.pdf
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
 
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
+
+mkdir -p fastQC/aln/file2_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln/file2_${bname} -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/file3_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln/filt3_${bname} -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
 
 #rm aln/${bname}_${seqDate}.filt2.bam
 
@@ -190,8 +196,7 @@ qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c -outdir fastQC/aln -out
 ########################################################
 ### index bam files for QuasR input                   ##
 ########################################################
-samtools index aln/${bname}_${seqDate}.sorted.bam
-samtools index aln/${bname}_${seqDate}.filt2.bam
+
 samtools index aln/${bname}_${seqDate}.filt3.bam
 
 
@@ -216,7 +221,8 @@ samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat
 ## Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
 
-qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c -outdir fastQC/aln -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/noOL_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln/noOL_${bname} -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
 
 
 ########################################################
@@ -231,4 +237,25 @@ echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_depthStats.txt
         #echo ${depthStats}
         #echo "${depthStats}" >> $@
 
+rm fastQC/aln/${bname}_${seqDate}_depthCol.txt
 
+
+########################################################
+### get multiqc report                                ##
+########################################################
+
+#multiqc ./fastQC
+
+
+########################################################
+### make input file for quasR                         ##
+########################################################
+
+if [[ -e ./txt/QuasR_Aligned.txt ]]
+then
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+else
+	mkdir -p txt
+	echo -e "FileName\tSampleName" > txt/QuasR_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+fi
