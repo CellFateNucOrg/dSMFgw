@@ -67,7 +67,6 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -107,6 +106,7 @@ samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_
 #rm aln/${bname}_${seqDate}.sort.bam
 
 
+fi # end trimmed brackets
 
 #######################################################
 ## Remove duplicates with Picard                     ##
@@ -149,7 +149,7 @@ rm aln/${bname}_${seqDate}.noDup.bam
 #######################################################
 
 # keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
-bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
+bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters_noDup.json
 
 # keep only reads that map to the same chromosome
 # write header to file temporarily
