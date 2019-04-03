@@ -50,13 +50,14 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
+fi # end trimmed brackets
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
 #######################################################
 
 #graphical parameter for bash shell
-#export DISPLAY=:0
+export DISPLAY=:0
 
 #use trimmomatic to trim
 mkdir -p trim
@@ -67,7 +68,6 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 # redo fastQC on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
-fi # end trimmed brackets
 
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
@@ -185,9 +185,10 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/$
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
 
 
-
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/file2_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln/file2_${bname} -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/file3_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln/filt3_${bname} -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
 
 #rm aln/${bname}_${seqDate}.filt2.bam
 
@@ -220,7 +221,8 @@ samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat
 ## Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
 
-qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/noOL_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln/noOL_${bname} -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
 
 
 ########################################################

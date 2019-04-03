@@ -50,13 +50,14 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
+fi # end trimmed brackets
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
 #######################################################
 
 #graphical parameter for bash shell
-#export DISPLAY=:0
+export DISPLAY=:0
 
 #use trimmomatic to trim
 mkdir -p trim
