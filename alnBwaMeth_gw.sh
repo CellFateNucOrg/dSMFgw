@@ -74,7 +74,7 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 #######################################################
 
 genomeDir=`dirname ${genomefile}`
-	c
+	
 # convert and index genome file for alignment
 if [[ ! -f ${genomeDir}/Bisulfite_Genome/CT_conversion/BS_CT.1.bt2 ]]
 then
@@ -86,7 +86,6 @@ fi
 mkdir -p aln
 ${BISMARKDIR}/bismark --genome ${genomeDir} -X 600 -o aln/ -B ${bname}_${seqDate} --nucleotide_coverage -1 trim/${bname}_${seqDate}_1P.fq.gz -2 trim/${bname}_${seqDate}_2P.fq.gz
 
-fi # end trimmed brackets
 
 
 
@@ -109,18 +108,30 @@ samtools flagstat aln/${bname}_${seqDate}_pe.bam > fastQC/aln/report_flagstat_1_
 ## Remove duplicates                                 ##
 #######################################################
 
-if [[ "${dataType}" = 'gw' ]] 
-then
-	${BISMARKDIR}/deduplicate_bismark -p --bam --output_dir aln/ -o ${bname}_${seqDate} aln/${bname}_${seqDate}_pe.bam
-else
-	mv aln/${bname}_${seqDate}_pe.bam aln/${bname}_${seqDate}.deduplicated.bam
-fi
+${BISMARKDIR}/deduplicate_bismark -p --bam --output_dir ./aln/ -o ${bname}_${seqDate} aln/${bname}_${seqDate}_pe.bam
 
 # get stats
 samtools flagstat  aln/${bname}_${seqDate}.deduplicated.bam > fastQC/aln/report_flagstat_2_${bname}_${seqDate}_deduplicated.bam
 
 
+fi # end trimmed brackets
 
+mv aln/${bname}_${seqDate}_pe.deduplication_report.txt fastQC/aln/${bname}_${seqDate}_pe.deduplication_report.txt
+
+${BISMARKDIR}/bismark_methylation_extractor  -p --merge_non_CpG --comprehensive --yacht --gzip -o methylation_calls/ --mulitcore ${numThreads} aln/${bname}_${seqDate}.deduplicated.bam
+
+#${BISMARKDIR}/bismark2bedGraph --CX
+
+
+#${BISMARKDIR}/coverage2cytosine  --genome_folder --nome-seq
+
+#${BISMARKDIR}/bismark2report --dir fastQC/aln/  --alignment_report fastQC/aln/${bname}_${seqDate}_PE_report.txt \     
+#	--dedup_report fastQC/aln/${bname}_${seqDate}_pe.deduplication_report.txt \
+#	--splitting_report 
+#	--mbias_report
+#	--nucleotide_report fastQC/aln/${bname}_${seqDate}_pe.nucleotide_stats.txt
+
+#${BISMARKDIR}/bismark2summary -o ${bname}_${seqDate}
 
 
 ##rt by query name for duplicate removal
