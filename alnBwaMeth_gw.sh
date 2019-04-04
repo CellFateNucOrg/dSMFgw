@@ -68,16 +68,13 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
 
-fi # end trimmed brackets
-
-
 
 #######################################################
-## align to genome with BWA-meth and convert to bam  ##
+## align to genome with and convert to bam           ##
 #######################################################
 
 genomeDir=`dirname ${genomefile}`
-	
+	c
 # convert and index genome file for alignment
 if [[ ! -f ${genomeDir}/Bisulfite_Genome/CT_conversion/BS_CT.1.bt2 ]]
 then
@@ -89,31 +86,45 @@ fi
 mkdir -p aln
 ${BISMARKDIR}/bismark --genome ${genomeDir} -X 600 -o aln/ -B ${bname}_${seqDate} --nucleotide_coverage -1 trim/${bname}_${seqDate}_1P.fq.gz -2 trim/${bname}_${seqDate}_2P.fq.gz
 
+fi # end trimmed brackets
 
-## convert to bam file to save space
-#samtools view -b -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
-#rm aln/${bname}_${seqDate}.sam
-#
-#
-#
+
+
 ########################################################
 ### Get alignment stats                               ##
 ########################################################
-#
-## get alignment stats (need to sort temporarily first)
-#mkdir -p fastQC/aln
-#samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
-#samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
-##rm aln/${bname}_${seqDate}.sort.bam
-#
-#
-#
-########################################################
-### Remove duplicates with Picard                     ##
-########################################################
-#
-##sort by query name for duplicate removal
-#java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate}.bam O=aln/${bname}_${seqDate}.qsort.bam SORT_ORDER=queryname TMP_DIR=${TMPDIR}
+
+# get alignment stats (need to sort temporarily first)
+mkdir -p fastQC/aln
+mv aln/${bname}_${seqDate}_PE_report.txt fastQC/aln/${bname}_${seqDate}_PE_report.txt
+mv aln/${bname}_${seqDate}_pe.nucleotide_stats.txt fastQC/aln/${bname}_${seqDate}_pe.nucleotide_stats.txt
+
+#samtools sort -o aln/${bname}_${seqDate}_PEsort.bam -@ ${numThreads} aln/${bname}_${seqDate}_pe.bam 
+samtools flagstat aln/${bname}_${seqDate}_pe.bam > fastQC/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
+#rm aln/${bname}_${seqDate}.sort.bam
+
+
+
+#######################################################
+## Remove duplicates                                 ##
+#######################################################
+
+if [[ "${dataType}" = 'gw' ]] 
+then
+	${BISMARKDIR}/deduplicate_bismark -p --bam --output_dir aln/ -o ${bname}_${seqDate} aln/${bname}_${seqDate}_pe.bam
+else
+	mv aln/${bname}_${seqDate}_pe.bam aln/${bname}_${seqDate}.deduplicated.bam
+fi
+
+# get stats
+samtools flagstat  aln/${bname}_${seqDate}.deduplicated.bam > fastQC/aln/report_flagstat_2_${bname}_${seqDate}_deduplicated.bam
+
+
+
+
+
+##rt by query name for duplicate removal
+#java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate}_pe.bam O=aln/${bname}_${seqDate}.qsort.bam SORT_ORDER=queryname TMP_DIR=${TMPDIR}
 #
 #
 ## remove duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)

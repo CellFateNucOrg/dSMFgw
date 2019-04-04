@@ -12,10 +12,10 @@ dataType=gw #either genome-wide ("gw") or amplicon ("amp")
 
 #start of the fastq filename that contains the sample name and is common between R1 and R2
 sampleNames=( dS16N2gw dS20N2gw ) #these are the beginning of the fastq filenames that specify the different samples
-testGroup=( N2 N2 ) # this is the biological group that you wish to test for contrasts (it must have the same lenght as the number of samples)
+testGroups=( N2_dS16gw N2_dS20gw ) # this is the biological group that you wish to test for contrasts (it must have the same length as the number of samples)
 
 # date the sequencing was performed
-seqDate="20180206"
+seqDate="20190206"
 
 # if script crashes or runs out of time you can avoid re-running cutadapt and trimmomatic by setting this to TRUE
 # normally this should be set to FALSE
