@@ -35,11 +35,11 @@ let i=$SLURM_ARRAY_TASK_ID-1
 # do QC and map 
 if [[ "$dataType" == gw ]]
 then
-	./alnBwaMeth_gw.sh ${sampleNames[$i]} ${testGroups[$i]} $SLURM_CPUS_PER_TASK
+	./alnBwaMeth_gw.sh ${sampleNames[$i]} ${testGroups[$i]} ${SLURM_CPUS_PER_TASK}
         echo "processing genome wide library"
 elif [[ "$dataType" == amp ]]
 then
-	./alnBwaMeth_amp.sh ${sampleNames[$i]} ${testGroups[$i]} $SLURM_CPUS_PER_TASK
+	./alnBwaMeth_amp.sh ${sampleNames[$i]} ${testGroups[$i]} ${SLURM_CPUS_PER_TASK}
         echo "processing amplicon library"
 else
         echo "ERROR: dataType in varSettings.sh must be either "amp" (amplicon library) or "gw" (genome-wide library)"

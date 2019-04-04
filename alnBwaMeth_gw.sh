@@ -118,7 +118,9 @@ fi # end trimmed brackets
 
 mv aln/${bname}_${seqDate}_pe.deduplication_report.txt fastQC/aln/${bname}_${seqDate}_pe.deduplication_report.txt
 
-${BISMARKDIR}/bismark_methylation_extractor  -p --merge_non_CpG --comprehensive --yacht --gzip -o methylation_calls/ --mulitcore ${numThreads} aln/${bname}_${seqDate}.deduplicated.bam
+echo ${numThreads}
+${BISMARKDIR}/bismark_methylation_extractor  -p --merge_non_CpG --comprehensive --gzip --multicore 4 -o methylation_calls/ aln/${bname}_${seqDate}.deduplicated.bam
+
 
 #${BISMARKDIR}/bismark2bedGraph --CX
 
