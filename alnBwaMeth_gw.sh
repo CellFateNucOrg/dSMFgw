@@ -50,9 +50,8 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
-fi # end trimmed brackets
+#fi # end trimmed brackets
 
-fi # end trimmed brackets
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
@@ -147,20 +146,38 @@ rm aln/${bname}_${seqDate}.noDup.bam
 
 
 #######################################################
+## separate CT and GA strand alignments              ##
+#######################################################
+
+samtools view -H aln/${bname}_${seqDate}.sorted.bam >  ${bname}_${seqDate}.header.sam
+samtools view aln/${bname}_${seqDate}.sorted.bam | grep "YC:Z:CT" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.CT.bam
+samtools view aln/${bname}_${seqDate}.sorted.bam | grep "YC:Z:GA" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.GA.bam
+rm ${bname}_${seqDate}.header.sam
+
+
+
+#######################################################
 ## Filter by mapping score, orientation, same chr    ##
 #######################################################
 
 # keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
-bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
+bamtools filter -in aln/${bname}_${seqDate}.CT.bam -out aln/${bname}_${seqDate}.CTfilt2.bam  -script myBamFilters.json
+bamtools filter -in aln/${bname}_${seqDate}.GA.bam -out aln/${bname}_${seqDate}.GAfilt2.bam  -script myBamFilters.json
+
+fi # end trimmed brackets
 
 # keep only reads that map to the same chromosome
 # write header to file temporarily
-samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
+samtools view -H aln/${bname}_${seqDate}.CTfilt2.bam >  ${bname}_${seqDate}.CTheader.sam
+samtools view -H aln/${bname}_${seqDate}.GAfilt2.bam >  ${bname}_${seqDate}.GAheader.sam
+
 # extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
 # and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
-rm ${bname}_${seqDate}.header.sam
+samtools view aln/${bname}_${seqDate}.CTfilt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.CTheader.sam - | samtools view -b - -o aln/${bname}_${seqDate}.CTfilt3.bam
+samtools view aln/${bname}_${seqDate}.GAfilt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.GAheader.sam - | samtools view -b - -o aln/${bname}_${seqDate}.GAfilt3.bam
 
+rm ${bname}_${seqDate}.CTheader.sam
+rm ${bname}_${seqDate}.GAheader.sam
 #rm aln/${bname}_${seqDate}.sorted.bam
 
 # for simple samtools filtering:
@@ -179,18 +196,23 @@ rm ${bname}_${seqDate}.header.sam
 ########################################################
 
 # get alignment stats again post-filtering
-samtools flagstat aln/${bname}_${seqDate}.filt2.bam  > fastQC/aln/report_flagstat_3_${bname}_${seqDate}_filt2.txt
-samtools flagstat aln/${bname}_${seqDate}.filt3.bam  > fastQC/aln/report_flagstat_4_${bname}_${seqDate}_filt3.txt
+samtools flagstat aln/${bname}_${seqDate}.CTfilt2.bam  > fastQC/aln/report_flagstat_3_${bname}_${seqDate}_CTfilt2.txt
+samtools flagstat aln/${bname}_${seqDate}.GAfilt2.bam  > fastQC/aln/report_flagstat_4_${bname}_${seqDate}_GAfilt2.txt
+
+samtools flagstat aln/${bname}_${seqDate}.CTfilt3.bam  > fastQC/aln/report_flagstat_5_${bname}_${seqDate}_CTfilt3.txt
+samtools flagstat aln/${bname}_${seqDate}.GAfilt3.bam  > fastQC/aln/report_flagstat_6_${bname}_${seqDate}_GAfilt3.txt
+
+
 
 ## Get insert size statistics and plots with picard and qualimap post-filtering
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt2.bam O=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_histogram.pdf
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.CTfilt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_CTfilt3_picard_insert_size_histogram.pdf
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.GAfilt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_GAfilt3_picard_insert_size_histogram.pdf
 
 
-mkdir -p fastQC/aln/file2_${bname}
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln/file2_${bname} -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
 mkdir -p fastQC/aln/file3_${bname}
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln/filt3_${bname} -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
+qualimap bamqc -bam aln/${bname}_${seqDate}.CTfilt3.bam -c --java-mem-size=8G -outdir fastQC/aln/CTfilt3_${bname} -outfile ${bname}_${seqDate}_CTfilt3_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/file3_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.GAfilt3.bam -c --java-mem-size=8G -outdir fastQC/aln/GAfilt3_${bname} -outfile ${bname}_${seqDate}_GAfilt3_report_qualimap.pdf -outformat PDF
 
 #rm aln/${bname}_${seqDate}.filt2.bam
 
@@ -198,67 +220,88 @@ qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -out
 ########################################################
 ### index bam files for QuasR input                   ##
 ########################################################
-samtools index aln/${bname}_${seqDate}.sorted.bam
-samtools index aln/${bname}_${seqDate}.filt2.bam
-samtools index aln/${bname}_${seqDate}.filt3.bam
+#samtools index aln/${bname}_${seqDate}.sorted.bam
+samtools index aln/${bname}_${seqDate}.CTfilt3.bam
+samtools index aln/${bname}_${seqDate}.GAfilt3.bam
 
 
 ########################################################
 ### clip overlap between reads                        ##
 ########################################################
 
-${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats &> fastQC/aln/clipOl_${bname}_${seqDate}.txt
+${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.CTfilt3.bam --out aln/${bname}_${seqDate}.CTnoOL.bam --stats &> fastQC/aln/clipCT_${bname}_${seqDate}.txt
+${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.GAfilt3.bam --out aln/${bname}_${seqDate}.GAnoOL.bam --stats &> fastQC/aln/clipGA_${bname}_${seqDate}.txt
 
 # index bam files for QuasR input
-samtools index aln/${bname}_${seqDate}.noOL.bam
+samtools index aln/${bname}_${seqDate}.CTnoOL.bam
+samtools index aln/${bname}_${seqDate}.GAnoOL.bam
 
 #rm aln/${bname}_${seqDate}.filt3.bam
+
 
 ########################################################
 ### Get stats on filtered reads                       ##
 ########################################################
 
 # get alignment stats again post-filtering
-samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat_5_${bname}_${seqDate}_noOL.txt
+samtools flagstat aln/${bname}_${seqDate}.CTnoOL.bam  > fastQC/aln/report_flagstat_7_${bname}_${seqDate}_CTnoOL.txt
+samtools flagstat aln/${bname}_${seqDate}.GAnoOL.bam  > fastQC/aln/report_flagstat_8_${bname}_${seqDate}_GAnoOL.txt
 
 ## Get insert size statistics and plots with picard and qualimap post-filtering
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.CTnoOL.bam O=fastQC/aln/${bname}_${seqDate}_CTnoOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_CAnoOL_picard_insert_size_histogram.pdf
+java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.GAnoOL.bam O=fastQC/aln/${bname}_${seqDate}_GAnoOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_GTnoOL_picard_insert_size_histogram.pdf
 
-mkdir -p fastQC/aln/noOL_${bname}
-qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln/noOL_${bname} -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
 
+mkdir -p fastQC/aln/CTnoOL_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.CTnoOL.bam -c --java-mem-size=8G -outdir fastQC/aln/CTnoOL_${bname} -outfile ${bname}_${seqDate}_CTnoOL_report_qualimap.pdf -outformat PDF
+mkdir -p fastQC/aln/GAnoOL_${bname}
+qualimap bamqc -bam aln/${bname}_${seqDate}.GAnoOL.bam -c --java-mem-size=8G -outdir fastQC/aln/GAnoOL_${bname} -outfile ${bname}_${seqDate}_GAnoOL_report_qualimap.pdf -outformat PDF
 
 ########################################################
 ### get median coverage                               ##
 ########################################################
 
-samtools depth -a aln/${bname}_${seqDate}.noOL.bam | cut -f3  > fastQC/aln/${bname}_${seqDate}_depthCol.txt
+samtools depth -a aln/${bname}_${seqDate}.CTnoOL.bam | cut -f3  > fastQC/aln/${bname}_${seqDate}_CTdepthCol.txt
+samtools depth -a aln/${bname}_${seqDate}.GAnoOL.bam | cut -f3  > fastQC/aln/${bname}_${seqDate}_GAdepthCol.txt
 
-echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_depthStats.txt
-./R/mmmm.r < fastQC/aln/${bname}_${seqDate}_depthCol.txt >> fastQC/aln/${bname}_${seqDate}_depthStats.txt
+echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_CTdepthStats.txt
+./R/mmmm.r < fastQC/aln/${bname}_${seqDate}_CTdepthCol.txt >> fastQC/aln/${bname}_${seqDate}_CTdepthStats.txt
         #depthStats=`./R/mmmm.r < $^`
         #echo ${depthStats}
         #echo "${depthStats}" >> $@
 
-rm fastQC/aln/${bname}_${seqDate}_depthCol.txt
+echo "min\tmax\tmedian\tmean" > fastQC/aln/${bname}_${seqDate}_GAdepthStats.txt
+./R/mmmm.r < fastQC/aln/${bname}_${seqDate}_GAdepthCol.txt >> fastQC/aln/${bname}_${seqDate}_GAdepthStats.txt
+        #depthStats=`./R/mmmm.r < $^`
+        #echo ${depthStats}
+        #echo "${depthStats}" >> $@
 
 
-########################################################
-### get multiqc report                                ##
-########################################################
 
-#multiqc ./fastQC
+rm fastQC/aln/${bname}_${seqDate}_CTdepthCol.txt
+rm fastQC/aln/${bname}_${seqDate}_GAdepthCol.txt
 
 
 ########################################################
 ### make input file for quasR                         ##
 ########################################################
 
-if [[ -e ./txt/QuasR_Aligned.txt ]]
+if [[ -e ./txt/QuasR_Aligned_CT.txt ]]
 then
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.CTnoOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned_CT.txt
 else
 	mkdir -p txt
-	echo -e "FileName\tSampleName" > txt/QuasR_Aligned.txt
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+	echo -e "FileName\tSampleName" > txt/QuasR_Aligned_CT.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.CTnoOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned_CT.txt
+fi
+
+
+
+if [[ -e ./txt/QuasR_Aligned_GA.txt ]]
+then
+        echo -e $PWD/aln/${bname}_${seqDate}.GAnoOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned_GA.txt
+else
+        mkdir -p txt
+        echo -e "FileName\tSampleName" > txt/QuasR_Aligned_GA.txt
+        echo -e $PWD/aln/${bname}_${seqDate}.GAnoOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned_GA.txt
 fi
