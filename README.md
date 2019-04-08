@@ -34,9 +34,11 @@ source deactivate bwameth
 ```
 
 ## Installing MethylDackel
+```
 conda create --name methyldackel python=3.7
 conda activate methyldackel
 conda install -c bioconda methyldackel
 conda deactivate
+````
 
 
