@@ -108,6 +108,7 @@ samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_
 #rm aln/${bname}_${seqDate}.sort.bam
 
 
+fi # end trimmed brackets
 
 #######################################################
 ## Remove duplicates with Picard                     ##
@@ -161,10 +162,13 @@ rm ${bname}_${seqDate}.header.sam
 #######################################################
 
 # keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
+
 bamtools filter -in aln/${bname}_${seqDate}.CT.bam -out aln/${bname}_${seqDate}.CTfilt2.bam  -script myBamFilters.json
 bamtools filter -in aln/${bname}_${seqDate}.GA.bam -out aln/${bname}_${seqDate}.GAfilt2.bam  -script myBamFilters.json
 
 fi # end trimmed brackets
+
+bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters_noDup.json
 
 # keep only reads that map to the same chromosome
 # write header to file temporarily

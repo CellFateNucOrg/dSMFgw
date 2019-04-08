@@ -4,6 +4,7 @@
       "isMapped" : "true",
       "isMateMapped" : "true",
       "mapQuality" : ">=30",
+      "isDuplicate" : "false",
       "isFailedQC"  : "false",
       "isPrimaryAlignment" : "true"
     },

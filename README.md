@@ -33,3 +33,18 @@ echo "export BWAMETH=${HOME}/.local/bin/bwameth.py" >> ~/.bashrc
 source deactivate bwameth
 ```
 
+## Installing MethylDackel
+```
+conda create --name methyldackel python=3.7
+conda activate methyldackel
+conda install -c bioconda methyldackel
+conda deactivate
+````
+
+Note, this is only version 3.0.
+Compiling the dev version didn't seem to work but didn't give an error either:
+```
+module load /software/UHTS/Analysis/HTSlib/1.9;
+
+make install CFLAGS="-O3 -Wall -I/software/UHTS/Analysis/HTSlib/1.9/include" LIBS="-L/software/UHTS/Analysis/HTSlib/1.9/lib" prefix=/home/ubelix/izb/semple/mySoftware/methyldackel
+
