@@ -73,7 +73,6 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
-# consider fastx-collapser to get rid of duplicates (works on SE reads!) http://hannonlab.cshl.edu/fastx_toolkit/
 
 source activate bwaMeth
 	
