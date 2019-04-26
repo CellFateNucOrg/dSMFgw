@@ -50,7 +50,6 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
-fi # end trimmed brackets
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
@@ -143,13 +142,17 @@ samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > fastQC/aln/report_flagst
 rm aln/${bname}_${seqDate}.noDup.bam
 
 
+fi # end trimmed brackets
 
 #######################################################
 ## Filter by mapping score, orientation, same chr    ##
 #######################################################
 
+# filter out not primary alignments (creates problems when creating methylation matrices)
+samtools view -F 256 -b -o aln/${bname}_${seqDate}.filt1.bam -@ ${numThreads} aln/${bname}_${seqDate}.sorted.bam
+
 # keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
-bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
+bamtools filter -in aln/${bname}_${seqDate}.filt1.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
 
 # keep only reads that map to the same chromosome
 # write header to file temporarily
