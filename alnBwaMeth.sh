@@ -127,7 +127,7 @@ if [[ "$dataType" = "gw" ]]
 then
 	java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=qc/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=true REMOVE_SEQUENCING_DUPLICATES=true  ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
 else 
-        java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=qc/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=false REMOVE_SEQUENCING_DUPLICATES=true  ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
+        java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${seqDate}.qsort.bam O=aln/${bname}_${seqDate}.noDup.bam M=qc/aln/report_${bname}_${seqDate}_picard.txt REMOVE_DUPLICATES=false REMOVE_SEQUENCING_DUPLICATES=false  ASSUME_SORT_ORDER=queryname TMP_DIR=${TMP}
 fi
 
 #-XX:ParallelGCThreads=${numThreads}
