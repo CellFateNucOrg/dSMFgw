@@ -50,7 +50,7 @@ cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
 mkdir -p fastQC/cutadapt
 fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./fastQC/cutadapt 
 
-fi # end trimmed brackets
+
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
@@ -69,10 +69,12 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o fastQC/trim
 
 
+fi # end trimmed brackets
+
+
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
-# consider fastx-collapser to get rid of duplicates (works on SE reads!) http://hannonlab.cshl.edu/fastx_toolkit/
 
 source activate bwaMeth
 	
@@ -107,7 +109,6 @@ samtools flagstat aln/${bname}_${seqDate}.sort.bam > fastQC/aln/report_flagstat_
 #rm aln/${bname}_${seqDate}.sort.bam
 
 
-fi # end trimmed brackets
 
 #######################################################
 ## Remove duplicates with Picard                     ##
@@ -115,7 +116,6 @@ fi # end trimmed brackets
 
 #sort by query name for duplicate removal
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate}.bam O=aln/${bname}_${seqDate}.qsort.bam SORT_ORDER=queryname TMP_DIR=${TMPDIR}
-
 
 # remove duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 # Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
@@ -130,6 +130,8 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar MarkDuplicates I=aln/${bname}_${
 # the you would have to use samtools view -F 1024
 
 rm aln/${bname}_${seqDate}.qsort.bam
+
+
 
 #######################################################
 ## Sort and get stats                                ##
@@ -155,11 +157,13 @@ bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDa
 # keep only reads that map to the same chromosome
 # write header to file temporarily
 samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
+
 # extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
 # and combine with header into a new bam file.
 samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
-rm ${bname}_${seqDate}.header.sam
 
+
+rm ${bname}_${seqDate}.header.sam
 #rm aln/${bname}_${seqDate}.sorted.bam
 
 # for simple samtools filtering:
@@ -179,48 +183,41 @@ rm ${bname}_${seqDate}.header.sam
 
 # get alignment stats again post-filtering
 samtools flagstat aln/${bname}_${seqDate}.filt2.bam  > fastQC/aln/report_flagstat_3_${bname}_${seqDate}_filt2.txt
+
 samtools flagstat aln/${bname}_${seqDate}.filt3.bam  > fastQC/aln/report_flagstat_4_${bname}_${seqDate}_filt3.txt
 
+
 ## Get insert size statistics and plots with picard and qualimap post-filtering
-java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt2.bam O=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt2_picard_insert_size_histogram.pdf
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.filt3.bam O=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_filt3_picard_insert_size_histogram.pdf
 
-
-mkdir -p fastQC/aln/file2_${bname}
-qualimap bamqc -bam aln/${bname}_${seqDate}.filt2.bam -c --java-mem-size=8G -outdir fastQC/aln/file2_${bname} -outfile ${bname}_${seqDate}_filt2_report_qualimap.pdf -outformat PDF
 mkdir -p fastQC/aln/file3_${bname}
 qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir fastQC/aln/filt3_${bname} -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
 
 #rm aln/${bname}_${seqDate}.filt2.bam
-
-
-########################################################
-### index bam files for QuasR input                   ##
-########################################################
-
-samtools index aln/${bname}_${seqDate}.filt3.bam
-
+le=${motifFile%.fa}.CGGC_motifs.RDS
 
 ########################################################
 ### clip overlap between reads                        ##
 ########################################################
 
-${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats &> fastQC/aln/clipOl_${bname}_${seqDate}.txt
+${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}_${seqDate}.noOL.bam --stats &> fastQC/aln/clip_${bname}_${seqDate}.txt
 
 # index bam files for QuasR input
 samtools index aln/${bname}_${seqDate}.noOL.bam
 
 #rm aln/${bname}_${seqDate}.filt3.bam
 
+
 ########################################################
-### Get stats on filtered reads                       ##
+### Get stats on clipped reads                       ##
 ########################################################
 
-# get alignment stats again post-filtering
+# get alignment stats again post-clipping
 samtools flagstat aln/${bname}_${seqDate}.noOL.bam  > fastQC/aln/report_flagstat_5_${bname}_${seqDate}_noOL.txt
 
 ## Get insert size statistics and plots with picard and qualimap post-filtering
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/${bname}_${seqDate}.noOL.bam O=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_metrics.txt H=fastQC/aln/${bname}_${seqDate}_noOL_picard_insert_size_histogram.pdf
+
 
 mkdir -p fastQC/aln/noOL_${bname}
 qualimap bamqc -bam aln/${bname}_${seqDate}.noOL.bam -c --java-mem-size=8G -outdir fastQC/aln/noOL_${bname} -outfile ${bname}_${seqDate}_noOL_report_qualimap.pdf -outformat PDF
@@ -242,21 +239,48 @@ rm fastQC/aln/${bname}_${seqDate}_depthCol.txt
 
 
 ########################################################
-### get multiqc report                                ##
+### make input file for R                             ##
 ########################################################
 
-#multiqc ./fastQC
-
-
-########################################################
-### make input file for quasR                         ##
-########################################################
-
-if [[ -e ./txt/QuasR_Aligned.txt ]]
+if [[ -e ./txt/bwameth_Aligned.txt ]]
 then
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/bwameth_Aligned.txt
 else
 	mkdir -p txt
-	echo -e "FileName\tSampleName" > txt/QuasR_Aligned.txt
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/QuasR_Aligned.txt
+	echo -e "FileName\tSampleName" > txt/bwameth_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/bwameth_Aligned.txt
+fi
+
+
+
+#######################################################
+## extract methylation with MethylDackel             ##
+#######################################################
+
+#activate environment
+source activate methyldackel
+
+MethylDackel extract --CHH --CHG -o meth_calls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+#MethylDackel extract --methylKit --CHH --CHG -o meth_calls/${bname}_${seqDate}_GA -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.GAnoOL.bam
+
+#MethylDackel extract ${genomefile} ${bname}_${seqDate}.CTnoOL.bam -o meth_calls/${bname}_${seqDate}_CT --minDepth=5 --methylKit --perRead?
+
+source deactivate
+
+#tail -n +2 meth_calls/dS16N2gw_20190206_CpG.bedGraph | cut -f1-3 > meth_calls/dS16N2gw_20190206_CpG.bed
+
+#java -Xms1g -Xmx8g -jar ${gatkDIR}/GenomeAnalysisTK.jar  -R ${genomefile} -T HaplotypeCaller -I aln/${bname}_${seqDate}.noOL.bam -o out.vcf -L meth_calls/positions.bed --output_mode EMIT_ALL_SITES --java-options '-DGATK_STACKTRACE_ON_USER_EXCEPTION=true'
+
+#gatk -R ${genomefile} -T HaplotypeCaller -I aln/${bname}_${seqDate}.noOL.bam -o out.vcf -L meth_calls/positions.bed --output_mode EMIT_ALL_SITES --java-options '-DGATK_STACKTRACE_ON_USER_EXCEPTION=true'
+
+#samtools mpileup -f ${genomefile} -l meth_calls/positions.bed -r "I:500-1000"  --output-QNAME aln/${bname}_${seqDate}.noOL.bam > var.vcf
+
+
+#######################################################
+## Prepare RDS of genome CG and GC motifs            ##
+#######################################################
+
+if [[ ! -f ${genomefile%.fa}.CGGC_motifs.RDS ]]
+then
+	Rscript getGenomeMotifs.R ${genomefile}
 fi
