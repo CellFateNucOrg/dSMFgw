@@ -78,7 +78,6 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
-conda activate bwaMeth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -92,7 +91,6 @@ mkdir -p aln
 ${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
 #${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
-conda deactivate
 
 # convert to bam file to save space
 samtools view -b -o aln/${bname}_${seqDate}.bam -@ ${numThreads} aln/${bname}_${seqDate}.sam
@@ -110,7 +108,6 @@ samtools flagstat aln/${bname}_${seqDate}.sort.bam > qc/aln/report_flagstat_1_${
 #rm aln/${bname}_${seqDate}.sort.bam
 
 
-fi # end trimmed brackets
 
 #######################################################
 ## Remove duplicates with Picard                     ##
@@ -266,21 +263,28 @@ fi
 
 
 
+
+
+fi # end trimmed brackets
+
 #######################################################
 ## extract methylation with MethylDackel             ##
 #######################################################
 
 #activate environment
-conda activate methyldackel
+source activate methyldackel
 
 mkdir -p methCalls
+mkdir -p perRead
 
 MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
 #MethylDackel extract --methylKit --CHH --CHG -o meth_calls/${bname}_${seqDate}_GA -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.GAnoOL.bam
 
 #MethylDackel extract ${genomefile} ${bname}_${seqDate}.CTnoOL.bam -o meth_calls/${bname}_${seqDate}_CT --minDepth=5 --methylKit --perRead?
 
-conda deactivate
+MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+
+#source deactivate
 
 #tail -n +2 meth_calls/dS16N2gw_20190206_CpG.bedGraph | cut -f1-3 > meth_calls/dS16N2gw_20190206_CpG.bed
 
