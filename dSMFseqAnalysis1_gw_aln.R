@@ -57,7 +57,6 @@ source('./R/variableSettings.R')
 
 
 
-##############
 # Variables
 ##############
 
@@ -99,7 +98,7 @@ cluObj=makeCluster(threadNum)
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -348,7 +347,7 @@ grToBw(smDSMF,dataCols,bwPath=paste0(path,"/bigwig"),
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -390,12 +389,10 @@ saveRDS(allSampleCmats,paste0(path,"/methylation_calls/allSampleCmats_TSS_amp.rd
 
 
 ###################################################
-# get separate GC and CG (and GCGC) matrices within each TSS region (getGCmatrix function)
-###################################################
+
 
 #allSampleCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCmats_TSS_amp.rds"))
 
-allSampleGCmats<-list()
 for (i in seq_along(samples)) {
   allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=genome,
                                               conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=F) # for Amplicon data use destrand=F !!!
@@ -519,7 +516,7 @@ for (i in allAmp2plot) {
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -596,9 +593,9 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_amp.pdf"),plot=ml,device="pdf",
 
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
-                genome=genomeFile,
+                genome=Celegans,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -689,7 +686,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -764,7 +761,7 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_hc.pdf"),plot=ml,device="pdf",
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -855,7 +852,7 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordM
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
                 genome=genomeFile,
                 paired="fr",
-                bisulfite="undir",
+                bisulfite="dir",
                 projectName=projectName,
                 clObj=cluObj)
 
