@@ -4,6 +4,7 @@
       "isMapped" : "true",
       "isMateMapped" : "true",
       "mapQuality" : ">=30",
+      "isDuplicate" : "false",
       "isFailedQC"  : "false",
       "isPrimaryAlignment" : "true"
     },
@@ -16,5 +17,5 @@
       "isMateReverseStrand" : "false"
     }
   ],
-  "rule" : "(mappedUniquely & frOrientation) | (mappedUniquely & rfOrientation)"
+  "rule" : "((mappedUniquely & frOrientation) | (mappedUniquely & rfOrientation))"
 }
