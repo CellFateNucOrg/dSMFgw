@@ -276,23 +276,17 @@ source activate methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
+mkdir -p mbias
+
 
 MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
-#MethylDackel extract --methylKit --CHH --CHG -o meth_calls/${bname}_${seqDate}_GA -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.GAnoOL.bam
-
-#MethylDackel extract ${genomefile} ${bname}_${seqDate}.CTnoOL.bam -o meth_calls/${bname}_${seqDate}_CT --minDepth=5 --methylKit --perRead?
 
 MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
 
+MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
+
 #source deactivate
 
-#tail -n +2 meth_calls/dS16N2gw_20190206_CpG.bedGraph | cut -f1-3 > meth_calls/dS16N2gw_20190206_CpG.bed
-
-#java -Xms1g -Xmx8g -jar ${gatkDIR}/GenomeAnalysisTK.jar  -R ${genomefile} -T HaplotypeCaller -I aln/${bname}_${seqDate}.noOL.bam -o out.vcf -L meth_calls/positions.bed --output_mode EMIT_ALL_SITES --java-options '-DGATK_STACKTRACE_ON_USER_EXCEPTION=true'
-
-#gatk -R ${genomefile} -T HaplotypeCaller -I aln/${bname}_${seqDate}.noOL.bam -o out.vcf -L meth_calls/positions.bed --output_mode EMIT_ALL_SITES --java-options '-DGATK_STACKTRACE_ON_USER_EXCEPTION=true'
-
-#samtools mpileup -f ${genomefile} -l meth_calls/positions.bed -r "I:500-1000"  --output-QNAME aln/${bname}_${seqDate}.noOL.bam > var.vcf
 
 
 #######################################################
