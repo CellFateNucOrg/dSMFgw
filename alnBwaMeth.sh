@@ -274,10 +274,13 @@ source activate methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
+mkdir -p mbias
 
 MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
 
 MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+
+MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
 
 #source deactivate
 
