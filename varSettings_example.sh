@@ -1,4 +1,4 @@
-#! /bin/bash
+##! /bin/bash
 # This file contains variable values that are important for running the scipts but that
 # can change, and are therefore externalised from the script. Copy the varSettings_example.sh
 # to varSettings.sh, then change verSettings.sh as necessary.
@@ -8,24 +8,29 @@
 ###################################################
 
 #type of dSMF library
-dataType=amp #either genome-wide ("gw") or amplicon ("amp")
+export dataType=gw #either genome-wide ("gw") or amplicon ("amp")
 
 #start of the fastq filename that contains the sample name and is common between R1 and R2
-sampleNames=( dS02-182 dS03-N2 dS04-182 ) #these are the beginning of the fastq filenames that specify the different samples
-testGroup=( F2 N2 F2 ) # this is the biological group that you wish to test for contrasts (it must have the same lenght as the number of samples)
+sampleNames=( dS16N2gw dS20N2gw ) #these are the beginning of the fastq filenames that specify the different samples
+testGroups=( N2_dS16gw N2_dS20gw ) # this is the biological group that you wish to test for contrasts (it must have the same lenght as the number of samples)
+
 
 # date the sequencing was performed
-seqDate="20181119"
+seqDate="20190206"
 
 # if script crashes or runs out of time you can avoid re-running cutadapt and trimmomatic by setting this to TRUE
 # normally this should be set to FALSE
-trimmed=FALSE
+trimmed=TRUE
+
+#directionality of libraries
+#export dirORundir="undir" # "dir" or "undir" setting for QuasR directional or undirectional libraries
 
 
 ###################################################
 # paths to software or files required by software (need to change for each cluster environment)
 ###################################################
 
+export genomeVer="WS235"
 # genome file used for alignment
 genomefile=${HOME}/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa  # on ubelix
 #genomefile=/data/projects/p025/Jenny/genomeVer/ws265/c_elegans.PRJNA13758.WS265.genomic.fa  # on bioinformatics cluster
@@ -41,6 +46,6 @@ trimAdapterFile='./TruSeq_2-3_PE.fa'
 #export BWAMETHDIR=/home/ubelix/izb/semple/mySoftware/bwa-meth-master
 export BAMUTIL=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
 picardDIR='/software/UHTS/Analysis/picard-tools/2.18.11/bin'
-
-
+#gatkDIR='/software/UHTS/Analysis/GenomeAnalysisTK/4.1.0.0'
+#export GATK_LOCAL_JAR=/software/UHTS/Analysis/GenomeAnalysisTK/4.0.4.0/GenomeAnalysisTK.jar
 
