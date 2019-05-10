@@ -71,7 +71,7 @@ java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${num
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 
 
-#fi # end trimmed brackets
+fi # end trimmed brackets
 
 
 #######################################################
@@ -263,7 +263,6 @@ fi
 
 
 
-fi #end of brackets for trimmed
 
 
 #######################################################

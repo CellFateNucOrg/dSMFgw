@@ -57,7 +57,6 @@ source('./R/variableSettings.R')
 
 
 
-##############
 # Variables
 ##############
 
@@ -103,8 +102,13 @@ cluObj=makeCluster(threadNum)
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned_',CTorGA,'.txt'),
                 genome=genomeFile,
+<<<<<<< HEAD
+                paired="fr",
+                bisulfite="dir",
+=======
                 paired=frORrf,
                 bisulfite=dirORundir,
+>>>>>>> a3c1a1ce2ab20cd468c655119b5827400537daeb
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -574,8 +578,13 @@ if (dataType=="amp") { # only execute of it is amplicon data
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned_',CTorGA,'.txt'),
                 genome=genomeFile,
+<<<<<<< HEAD
+                paired="fr",
+                bisulfite="dir",
+=======
                 paired=frORrf,
                 bisulfite=dirORundir,
+>>>>>>> a3c1a1ce2ab20cd468c655119b5827400537daeb
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -622,12 +631,10 @@ saveRDS(allSampleCmats,paste0(path,"/methylation_calls/allSampleCmats_TSS_amp",C
 
 
 ###################################################
-# get separate GC and CG (and GCGC) matrices within each TSS region (getGCmatrix function)
-###################################################
+
 
 #allSampleCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCmats_TSS_amp",CTorGA,".rds"))
 
-allSampleGCmats<-list()
 for (i in seq_along(samples)) {
   allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=genome,
                                               conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=F) # for Amplicon data use destrand=F !!!
@@ -758,8 +765,13 @@ for (i in allAmp2plot) {
 # point the QuasR project at BAM files from now on
 dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned_',CTorGA,'.txt'),
                 genome=genomeFile,
+<<<<<<< HEAD
+                paired="fr",
+                bisulfite="dir",
+=======
                 paired=frORrf,
                 bisulfite=dirORundir,
+>>>>>>> a3c1a1ce2ab20cd468c655119b5827400537daeb
                 projectName=projectName,
                 clObj=cluObj)
 
@@ -789,7 +801,181 @@ for (i in seq_along(samples)) {
 }
 # convert position from factor to numeric
 allSampleMetaMethFreqDF$position<-as.numeric(as.character(allSampleMetaMethFreqDF$position))
+<<<<<<< HEAD
+saveRDS(allSampleMetaMethFreqDF,paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_amp.rds"))
+
+#allSampleMetaMethFreqDF<-readRDS(paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_amp.rds"))
+
+### plot metagene by sample
+# subsample if too many points
+if (nrow(allSampleMetaMethFreqDF)>10000) {
+  idx<-sample(1:nrow(allSampleMetaMethFreqDF),10000)
+ } else {
+  idx<-1:nrow(allSampleMetaMethFreqDF)
+ }
+
+p1<-ggplot(allSampleMetaMethFreqDF[idx,],aes(x=position,y=1-methFreq)) +
+  theme_light(base_size=16) + ylim(0,1) +
+  xlab("Position relative to TSS") + ylab("dSMF (1-%methylation)") +
+  geom_linerange(aes(x=0, y=NULL, ymin=0, ymax=1),color="steelblue",size=1) +
+  geom_point(alpha=0.1) +
+  geom_smooth(colour="red",fill="red") +
+  facet_wrap(~sample)
+
+p2<-ggplot(allSampleMetaMethFreqDF,aes(x=position,y=1-methFreq,colour=sample)) +
+  theme_light(base_size=16) + ylim(0,1) +
+  xlab("Position relative to TSS") + ylab("dSMF (1-%methylation)") +
+  geom_linerange(aes(x=0, y=NULL, ymin=0, ymax=1),color="steelblue",size=1) +
+  geom_smooth(se=FALSE)
+
+ml <- marrangeGrob(list(p1,p2), nrow=1, ncol=1)
+ggsave(paste0(path,"/plots/metaGenePlots_TSS_amp.pdf"),plot=ml,device="pdf",
+       width=20,height=20,units="cm")
+
+
+
+
+#} # end of brackets for already aligned...
+
+
+
+###############################################################################################
+#####################    Extract single read data centered on high confidence TSS   ###########
+###############################################################################################
+
+###################################################
+# get single read matrices for all Cs
+###################################################
+
+# point the QuasR project at BAM files from now on
+dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
+                genome=Celegans,
+                paired="fr",
+                bisulfite="dir",
+                projectName=projectName,
+                clObj=cluObj)
+
+# read sample names from dSMFproj
+samples<-dSMFproj@alignments$SampleName
+
+
+# to get individual methylation matrices for an TSS
+# make a list (by sample) of lists of matrices (by TSS)
+# e.g
+# [1] sample1
+#     [1] TSS1 matrix of reads x Cpositions
+#     [2] TSS2 matrix of reads x Cpositions
+# [2] sample2
+#     [1] TSS1 matrix of reads x Cpositions
+#     [2] TSS2 matrix of reads x Cpositions
+
+#######
+# Extract all C positions within each amplicon (getCmethMatrix function)
+#######
+TSS<-highConfTSS
+tssWin<-TSS
+mcols(tssWin)$TSS<-start(TSS)
+tssWin<-resize(tssWin,width=winSize,fix="center")
+#names(mcols(tssWin))[1]<-"ID"
+allCmats=list()
+allSampleCmats=list()
+for (currentSample in samples) {
+  for (i in seq_along(tssWin)) {
+    print(i)
+    mat<-getCmethMatrix(dSMFproj,tssWin[i],currentSample)
+    allCmats[[tssWin[i]$ID]]<-mat
+  }
+  allSampleCmats[[currentSample]]<-allCmats
+}
+saveRDS(allSampleCmats,paste0(path,"/methylation_calls/allSampleCmats_TSS_hc.rds"))
+
+
+
+###################################################
+# get separate GC and CG (and GCGC) matrices within each TSS region (getGCmatrix function)
+###################################################
+
+#allSampleCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCmats_TSS_hc.rds"))
+
+allSampleGCmats<-list()
+for (i in seq_along(samples)) {
+  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=genome,
+                                              conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=F) # for Amplicon data use destrand=F !!!
+}
+saveRDS(allSampleGCmats,paste0(path,"/methylation_calls/allSampleCGmatGCmat_TSS_hc.rds"))
+
+
+###################################################
+# merge GC and CG (and GCGC) matrices within each TSS region (mergeGC_CGmats) to get a single matrix
+###################################################
+
+#allSampleGCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCGmatGCmat_TSS_hc.rds"))
+
+
+allSampleMergedMats<-list()
+for (i in seq_along(samples)) {
+  allSampleMergedMats[[samples[i]]]<-mergeGC_CGmats(matList=allSampleGCmats[[samples[i]]])
+}
+saveRDS(allSampleMergedMats,paste0(path,"/methylation_calls/allSampleMergedMats_TSS_hc.rds"))
+
+
+###################################################
+# convert merged matrices to relative coordinates
+###################################################
+
+#allSampleMergedMats<-readRDS(paste0(path,"/methylation_calls/allSampleMergedMats_TSS_hc.rds"))
+
+allSampleRelCoordMats<-list()
+for (i in seq_along(samples)) {
+  allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMergedMats[[samples[i]]],
+                                                            grs=tssWin,anchorCoord=winSize/2)
+}
+saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordMats_TSS_hc.rds"))
+
+
+
+###################################################
+# summarise data for Metagene
+###################################################
+
+# point the QuasR project at BAM files from now on
+dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
+                genome=genomeFile,
+                paired="fr",
+                bisulfite="dir",
+                projectName=projectName,
+                clObj=cluObj)
+
+# read sample names from dSMFproj
+samples<-dSMFproj@alignments$SampleName
+
+#allSampleRelCoordMats<-readRDS(paste0(path,"/methylation_calls/allSampleRelCoordMats_TSS_hc:.rds"))
+
+tssWin<-TSS
+mcols(tssWin)$TSS<-start(TSS)
+tssWin<-resize(tssWin,width=winSize,fix="center")
+#names(mcols(tssWin))[1]<-"ID"
+tssWinRelCoord<-tssWin
+start(tssWinRelCoord)<--winSize/2
+end(tssWinRelCoord)<-winSize/2
+
+rm("allSampleMetaMethFreqDF")
+for (i in seq_along(samples)) {
+  metaMethFreqDF<-getMetaMethFreq(matList=allSampleRelCoordMats[[samples[i]]],regionGRs=tssWinRelCoord,minReads=10)
+  print(samples[i])
+  metaMethFreqDF$sample<-samples[i]
+  if(exists("allSampleMetaMethFreqDF")) {
+    allSampleMetaMethFreqDF<-rbind(allSampleMetaMethFreqDF,metaMethFreqDF)
+  } else {
+   allSampleMetaMethFreqDF<-metaMethFreqDF
+  }
+}
+# convert position from factor to numeric
+allSampleMetaMethFreqDF$position<-as.numeric(as.character(allSampleMetaMethFreqDF$position))
+saveRDS(allSampleMetaMethFreqDF,paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_hc.rds"))
+=======
 saveRDS(allSampleMetaMethFreqDF,paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_amp",CTorGA,".rds"))
+>>>>>>> a3c1a1ce2ab20cd468c655119b5827400537daeb
 
 #allSampleMetaMethFreqDF<-readRDS(paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_amp",CTorGA,".rds"))
 
@@ -822,6 +1008,171 @@ ggsave(paste0(path,"/plots/metaGenePlots_TSS_amp",CTorGA,".pdf"),plot=ml,device=
 
 
 
+<<<<<<< HEAD
+###############################################################################################
+#####################    Extract single read data centered on less confidence TSS   ###########
+###############################################################################################
+
+###################################################
+# get single read matrices for all Cs
+###################################################
+
+# point the QuasR project at BAM files from now on
+dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
+                genome=genomeFile,
+                paired="fr",
+                bisulfite="dir",
+                projectName=projectName,
+                clObj=cluObj)
+
+# read sample names from dSMFproj
+samples<-dSMFproj@alignments$SampleName
+
+
+# to get individual methylation matrices for an TSS
+# make a list (by sample) of lists of matrices (by TSS)
+# e.g
+# [1] sample1
+#     [1] TSS1 matrix of reads x Cpositions
+#     [2] TSS2 matrix of reads x Cpositions
+# [2] sample2
+#     [1] TSS1 matrix of reads x Cpositions
+#     [2] TSS2 matrix of reads x Cpositions
+
+#######
+# Extract all C positions within each amplicon (getCmethMatrix function)
+#######
+TSS<-lessConfTSS
+tssWin<-TSS
+mcols(tssWin)$TSS<-start(TSS)
+tssWin<-resize(tssWin,width=300,fix="center")
+#names(mcols(tssWin))[1]<-"ID"
+allCmats=list()
+allSampleCmats=list()
+for (currentSample in samples) {
+  for (i in seq_along(tssWin)) {
+    print(i)
+    mat<-getCmethMatrix(dSMFproj,tssWin[i],currentSample)
+    allCmats[[tssWin[i]$ID]]<-mat
+  }
+  allSampleCmats[[currentSample]]<-allCmats
+}
+saveRDS(allSampleCmats,paste0(path,"/methylation_calls/allSampleCmats_TSS_lc.rds"))
+
+
+
+###################################################
+# get separate GC and CG (and GCGC) matrices within each TSS region (getGCmatrix function)
+###################################################
+
+#allSampleCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCmats_TSS_lc.rds"))
+
+allSampleGCmats<-list()
+for (i in seq_along(samples)) {
+  allSampleGCmats[[samples[i]]]<-getGCmatrix1(matList=allSampleCmats[[i]], ampliconGR=tssWin, genome=genome,
+                                              conv.rate=80, sampleName=names(allSampleCmats)[i],destrand=F,plotData=F) # for Amplicon data use destrand=F !!!
+}
+saveRDS(allSampleGCmats,paste0(path,"/methylation_calls/allSampleCGmatGCmat_TSS_lc.rds"))
+
+
+###################################################
+# merge GC and CG (and GCGC) matrices within each TSS region (mergeGC_CGmats) to get a single matrix
+###################################################
+
+#allSampleGCmats<-readRDS(paste0(path,"/methylation_calls/allSampleCGmatGCmat_TSS_lc.rds"))
+
+
+allSampleMergedMats<-list()
+for (i in seq_along(samples)) {
+  allSampleMergedMats[[samples[i]]]<-mergeGC_CGmats(matList=allSampleGCmats[[samples[i]]])
+}
+saveRDS(allSampleMergedMats,paste0(path,"/methylation_calls/allSampleMergedMats_TSS_lc.rds"))
+
+
+###################################################
+# convert merged matrices to relative coordinates
+###################################################
+
+#allSampleMergedMats<-readRDS(paste0(path,"/methylation_calls/allSampleMergedMats_TSS_lc.rds"))
+
+allSampleRelCoordMats<-list()
+for (i in seq_along(samples)) {
+  allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMergedMats[[samples[i]]],
+                                                            grs=tssWin,anchorCoord=winSize/2)
+}
+saveRDS(allSampleRelCoordMats,paste0(path,"/methylation_calls/allSampleRelCoordMats_TSS_lc.rds"))
+
+
+
+###################################################
+# summarise data for Metagene
+###################################################
+
+# point the QuasR project at BAM files from now on
+dSMFproj=qAlign(sampleFile=paste0(path,'/txt/QuasR_Aligned.txt'),
+                genome=genomeFile,
+                paired="fr",
+                bisulfite="dir",
+                projectName=projectName,
+                clObj=cluObj)
+
+# read sample names from dSMFproj
+samples<-dSMFproj@alignments$SampleName
+
+#allSampleRelCoordMats<-readRDS(paste0(path,"/methylation_calls/allSampleRelCoordMats_TSS_lc.rds"))
+winSize
+tssWin<-TSS
+mcols(tssWin)$TSS<-start(TSS)
+tssWin<-resize(tssWin,width=winSize,fix="center")
+#names(mcols(tssWin))[1]<-"ID"
+tssWinRelCoord<-tssWin
+start(tssWinRelCoord)<--winSize/2
+end(tssWinRelCoord)<-winSize/2
+
+rm("allSampleMetaMethFreqDF")
+for (i in seq_along(samples)) {
+  metaMethFreqDF<-getMetaMethFreq(matList=allSampleRelCoordMats[[samples[i]]],regionGRs=tssWinRelCoord,minReads=10)
+  print(samples[i])
+  metaMethFreqDF$sample<-samples[i]
+  if(exists("allSampleMetaMethFreqDF")) {
+    allSampleMetaMethFreqDF<-rbind(allSampleMetaMethFreqDF,metaMethFreqDF)
+  } else {
+   allSampleMetaMethFreqDF<-metaMethFreqDF
+  }
+}
+# convert position from factor to numeric
+allSampleMetaMethFreqDF$position<-as.numeric(as.character(allSampleMetaMethFreqDF$position))
+saveRDS(allSampleMetaMethFreqDF,paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_lc.rds"))
+
+#allSampleMetaMethFreqDF<-readRDS(paste0(path,"/methylation_calls/allSampleMetaMethFreqDF_TSS_lc.rds"))
+
+### plot metagene by sample
+# subsample if too many points
+if (nrow(allSampleMetaMethFreqDF)>10000) {
+  idx<-sample(1:nrow(allSampleMetaMethFreqDF),10000)
+ } else {
+  idx<-1:nrow(allSampleMetaMethFreqDF)
+ }
+
+p1<-ggplot(allSampleMetaMethFreqDF[idx,],aes(x=position,y=1-methFreq)) +
+  theme_light(base_size=16) + ylim(0,1) +
+  xlab("Position relative to TSS") + ylab("dSMF (1-%methylation)") +
+  geom_linerange(aes(x=0, y=NULL, ymin=0, ymax=1),color="steelblue",size=1) +
+  geom_point(alpha=0.1) +
+  geom_smooth(colour="red",fill="red") +
+  facet_wrap(~sample)
+
+p2<-ggplot(allSampleMetaMethFreqDF,aes(x=position,y=1-methFreq,colour=sample)) +
+  theme_light(base_size=16) + ylim(0,1) +
+  xlab("Position relative to TSS") + ylab("dSMF (1-%methylation)") +
+  geom_linerange(aes(x=0, y=NULL, ymin=0, ymax=1),color="steelblue",size=1) +
+  geom_smooth(se=FALSE)
+
+ml <- marrangeGrob(list(p1,p2), nrow=1, ncol=1)
+ggsave(paste0(path,"/plots/metaGenePlots_TSS_lc.pdf"),plot=ml,device="pdf",
+       width=20,height=20,units="cm")
+=======
+>>>>>>> a3c1a1ce2ab20cd468c655119b5827400537daeb
 
 
 if (dataType=="gw") {
