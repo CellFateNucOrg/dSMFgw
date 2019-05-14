@@ -243,6 +243,14 @@ echo "min\tmax\tmedian\tmean" > qc/aln/${bname}_${seqDate}_depthStats.txt
 ./R/mmmm.r < qc/aln/${bname}_${seqDate}_depthCol.txt >> qc/aln/${bname}_${seqDate}_depthStats.txt
         #depthStats=`./R/mmmm.r < $^`
         #echo ${depthStats}
+MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
+nly reads that map to the same chromosome
+# write header to file temporarily
+samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
+
+# extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs),
+# and combine with header into a new bam file.
+samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
         #echo "${depthStats}" >> $@
 
 rm qc/aln/${bname}_${seqDate}_depthCol.txt
@@ -276,14 +284,36 @@ mkdir -p methCalls
 mkdir -p perRead
 mkdir -p mbias
 
-MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+if [[ "$dataType" = "gw" ]]
+then
+	MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
+else
+	# do not remove duplicates so change the default ignoreFlags (-F)
+	MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -F 2816 -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	MethylDackel perRead -@ ${numThreads} -F 2816 -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	MethylDackel mbias ${genomefile} -F 2816 aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
+fi
 
-MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
-
-MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
 
 #source deactivate
 
+#######################################################
+## split f and r strand for single molecule matrix calling             
+#######################################################
+
+# write header to file temporarily
+samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
+
+# separate rows that have f or r in YD:Z tag
+# and combine with header into a new bam file.
+samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
+samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
+rm ${bname}_${seqDate}.header.sam
+
+samtools index aln/${bname}_${seqDate}.noOLf.bam
+samtools index aln/${bname}_${seqDate}.noOLr.bam
 
 #######################################################
 ## Prepare RDS of genome CG and GC motifs            ##
