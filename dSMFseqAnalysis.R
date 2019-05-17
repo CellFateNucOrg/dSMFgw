@@ -448,11 +448,11 @@ if (dataType=="amp") { # only execute of it is amplicon data
 
   #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-    plotAllMatrices(allSampleMats, samples, regionGRs=regionGRs, featureGRs=ampTSS, featureLabel="TSS",
+    plotAllMatrices(allSampleMats, samples, regionGRs=amplicons, featureGRs=ampTSS, featureLabel="TSS",
                     regionType=regionType, maxNAfraction=0.2, withAvr=FALSE, includeInFileName=seqDate,
                     drawArrow=TRUE)
 
-    plotAllMatrices(allSampleMats, samples, regionGRs=regionGRs, featureGRs=ampTSS, featureLabel="TSS",
+    plotAllMatrices(allSampleMats, samples, regionGRs=amplicons, featureGRs=ampTSS, featureLabel="TSS",
                     regionType=regionType, maxNAfraction=0.2, withAvr=TRUE, includeInFileName=seqDate,
                     drawArrow=TRUE)
 
