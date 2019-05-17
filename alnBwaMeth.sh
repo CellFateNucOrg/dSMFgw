@@ -262,11 +262,11 @@ rm qc/aln/${bname}_${seqDate}_depthCol.txt
 
 if [[ -e ./txt/bwameth_Aligned.txt ]]
 then
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/bwameth_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${bname}"\t"${testGroup} >> txt/bwameth_Aligned.txt
 else
 	mkdir -p txt
-	echo -e "FileName\tSampleName" > txt/bwameth_Aligned.txt
-	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${testGroup}"_"${bname} >> txt/bwameth_Aligned.txt
+	echo -e "FileName\tSampleName\tTestGroup" > txt/bwameth_Aligned.txt
+	echo -e $PWD/aln/${bname}_${seqDate}.noOL.bam"\t"${bname}"\t"${testGroup} >> txt/bwameth_Aligned.txt
 fi
 
 

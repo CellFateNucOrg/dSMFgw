@@ -30,7 +30,7 @@ library(gridExtra)
 library(dplyr)
 library(tidyr)
 library(ggpubr)
-library(nanodsmf)
+#library(nanodsmf)
 library(methMatrix)
 
 # collect citations for packages used
@@ -56,12 +56,7 @@ source('./R/variableSettings.R')
 # Variables
 ##############
 options("scipen"=8, "digits"=4)
-args = commandArgs(trailingOnly=TRUE)
-genomeFile=args[1]
-seqDate=args[2]
-path="."
-expName=args[3]
-dataType="amp"
+options(device=pdf)
 
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
 # the script. the variableSettings_example.R file downloaded from the repo should be correctly
@@ -71,9 +66,6 @@ dataType="amp"
 # standard variables that should probably not be changed
 minConversionRate=0.8
 maxNAfraction=0.2
-
-testGroup<-testGroups
-print(testGroup)
 
 
 # see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
@@ -87,7 +79,7 @@ gnmMotifGR<-readRDS(motifFile)
 bedFilePrefix=gsub("\\.fa","",genomeFile)
 
 
-#assume sample table is stored in ./txt/bwameth_Aligned.txt
+# assume sample table is stored in ./txt/bwameth_Aligned.txt
 fileList<-read.delim("./txt/bwameth_Aligned.txt",stringsAsFactors=F)
 fileList<-fileList[ordered(fileList$SampleName),]
 samples<-fileList$SampleName
@@ -101,27 +93,7 @@ samples<-fileList$SampleName
 ################
 
 #setup directory structure this to desired location of your alignments
-if (!dir.exists(paste0(path,"/plots"))) {
-  dir.create(paste0(path,"/plots"))
-}
-if (!dir.exists(paste0(path,"/txt"))) {
-  dir.create(paste0(path,"/txt"))
-}
-if (!dir.exists(paste0(path,"/methCalls"))){
-  dir.create(paste0(path,"/methCalls"))
-}
-if (!dir.exists(paste0(path,"/csv"))){  # for various summary tables of information
-  dir.create(paste0(path,"/csv"))
-}
-if (!dir.exists(paste0(path,"/bigwig"))){
-  dir.create(paste0(path,"/bigwig"))
-}
-if (!dir.exists(paste0(path,"/rds"))){
-  dir.create(paste0(path,"/rds"))
-}
-if (!dir.exists(paste0(path,"/bedgraph"))){
-  dir.create(paste0(path,"/bedgraph"))
-}
+makeDirs(path,c("plots","methCalls","csv","bigwig","rds"))
 
 
 ###############################################################################################
@@ -381,8 +353,10 @@ if (length(cggcFreqGR)>1e4) {
 
 
 
+print(testGroup)
 lapply(testGroup,function(g) {
     bioReplicates<-c(grep(g,names(mcols(cggcFreqGR))))
+    print(bioReplicates)
     p<-ggpairs(as.data.frame(1-as.matrix(mcols(cggcFreqGR[sampleCs, bioReplicates]))),
              title=paste0("Correlation between biological replicates: ",g))
     print(p)
@@ -404,8 +378,6 @@ dev.off()
 # make bigwig tracks of data
 ###################################################
 
-# reading in combined GC GC list
-#methFreq_gr<-readRDS(paste0(path,"/methylation_calls/dSMFproj_allCG-GC_",dataType,CTorGA,"_methFreq_gr.rds"))
 
 w=10 #winSize for smoothing
 
@@ -464,8 +436,8 @@ if (dataType=="amp") { # only execute of it is amplicon data
   regionType="rawAmp"
 
   allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
-                                           regionType=regionType, minConversionRate=0.8,maxNAfraction=0.2,
-                                           bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8, 
+					   maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
@@ -521,8 +493,8 @@ mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
 allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                         regionType=regionType, minConversionRate=0.8,maxNAfraction=0.2,
-                                         bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+                                         regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8, 
+					 maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
 
 saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -533,7 +505,6 @@ saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"
 # convert merged matrices to relative coordinates
 ###################################################
 
-#allSampleMergedMats<-readRDS(paste0(path,"/methylation_calls/allSampleMergedMats_TSS_amp",CTorGA,".rds"))
 
 allSampleRelCoordMats<-list()
 for (i in seq_along(samples)) {
@@ -615,8 +586,8 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                           regionType=regionType, minConversionRate=0.8,maxNAfraction=0.2,
-                                           bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
+                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8,
+					   maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -688,8 +659,8 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                             regionType=regionType, minConversionRate=0.8,maxNAfraction=0.2,
-                                             bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
+                                             regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8,
+					     maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))

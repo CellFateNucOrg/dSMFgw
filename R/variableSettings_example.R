@@ -1,19 +1,43 @@
 # settings of some variables required by dSMFseqAnalysis1_amp_aln.R and dSMFseqAnalysis2_amp_XvA.R
 
+# sourcing variables from varSettings.sh
 # number of threads you wish to use
-threadNum=4
-dataType=Sys.getenv("dataType")
+#threadNum=Sys.getenv("threadNum")
+getUnixVar<-function(varName){
+	varLine<-system(paste0("grep ^",varName," varSettings.sh"),intern=TRUE)
+	varVal<-gsub(paste0("^",varName,"\\s*=\\s*"),"",varLine)
+	varVal<-gsub("#.*$","",varVal)
+	varVal<-gsub("\\s*$","",varVal)	
+	return(varVal)
+}
 
-# default path is the project working directory (dSMFamplicon).
+
+dataType=getUnixVar("dataType")
+genomeFile=getUnixVar("genomefile")
+seqDate=getUnixVar("seqDate")
+expName=getUnixVar("expName")
+
+
+# default path is the project working directory.
 # Note that rawData should be one level up from this location (../rawData)
 path<-getwd()
+
+# labels for main biological comparison you wish to make (labels should be included at the start of the
+# sample name in the settings file)
+#testGroup<-c("N2")
+#extract testgroups from varSettings.sh file
+testGroup<-system("grep testGroups varSettings.sh",intern=TRUE)
+testGroup<-gsub("^testGroups=\\s*\\(\\s*","",testGroup)
+testGroup<-gsub("\\s*\\).*","",testGroup)
+testGroup<-unique(unlist(strsplit(testGroup,"\\s+")))
+
 
 #load main genome to which you wish to align sequences and store it under the geneirc "genome" variable
 library("BSgenome.Celegans.UCSC.ce11")
 genome<-Celegans
 
 #genomeVer="WS235"
-genomeVer<-Sys.getenv("genomeVer")
+genomeVer<-getUnixVar("genomeVer")
 
 ucscToWbGR<-function(ucscGR) {
   wbGR<-ucscGR
@@ -39,8 +63,6 @@ if (genomeVer=="WS235") {
 #auxGenomeFile<-c("~/genomeVer/ecoli/Escherichia_coli.HUSEC2011CHR1.dna.fa", 
 #        "~/genomeVer/phiX/phiX.fasta", "~/genomeVer/lambda/lambdaPhage.fasta") 
 
-# QuasR project name
-projectName<-"dSMF"
 
 # file with genomic ranges for amplicons. Must contain a metadata column called "ID" with a unique name for
 # each amplicon (e.g. gene name)
@@ -71,15 +93,5 @@ lessConfTSS$ID<-names(lessConfTSS)
 if (genomeVer!="WS235") {
     seqlevels(lessConfTSS)<-paste0("chr",seqlevels(lessConfTSS))
 }
-
-# labels for main biological comparison you wish to make (labels should be included at the start of the
-# sample name in the settings file)
-#testGroup<-c("N2")
-#extract testgroups from varSettings.sh file
-testGroups<-system("grep testGroups varSettings.sh",intern=TRUE)
-testGroups<-gsub("^testGroups=\\s*\\(\\s*","",testGroups)
-testGroups<-gsub("\\s*\\).*","",testGroups)
-testGroups<-unique(unlist(strsplit(testGroups,"\\s+")))
-
 
 
