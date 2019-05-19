@@ -114,7 +114,7 @@ for (sampleName in samples) {
 
 ## save as rds for future access
 saveRDS(methFreqGR,paste0(path,"/rds/methFreqAllCsGRs_",seqDate,"_",dataType,".rds"))
-methFreqGR<-readRDS(paste0(path,"/rds/methFreqAllCsGRs_",seqDate,"_",dataType,".rds"))
+#methFreqGR<-readRDS(paste0(path,"/rds/methFreqAllCsGRs_",seqDate,"_",dataType,".rds"))
 
 
 
@@ -168,7 +168,7 @@ ggsave(paste0(path,"/plots/allC_convRateStats_",seqDate,"_",expName,".pdf"),plot
 #export(bad,paste0(path,"/bedgraph/badCs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodCs.bedgraph"),format="bedgraph")
 
-
+rm(list=c("Cs","p","p1*,"p2","p3"))
 
 
 ###############################################################################################
@@ -230,6 +230,9 @@ ggsave(paste0(path,"/plots/CGs_methStats_",seqDate,"_",expName,".pdf"),plot=p,de
 #export(bad,paste0(path,"/bedgraph/badCGs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodCGs.bedgraph"),format="bedgraph")
 
+rm(list=c("CGs","p","p1*,"p2","p3"))
+
+
 
 ###############################################################################################
 #####################         PLOT METHYLATION in GpC context        ######################
@@ -290,6 +293,9 @@ ggsave(paste0(path,"/plots/GCs_methStats_",seqDate,"_",expName,".pdf"),plot=p,de
 #export(bad,paste0(path,"/bedgraph/badGCs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodGCs.bedgraph"),format="bedgraph")
 
+rm(list=c("GCs","p","p1*,"p2","p3"))
+
+
 
 ###############################################################################################
 #####################         combine CG and GC metrices                 ######################
@@ -301,6 +307,10 @@ colnames(mcols(cggcFreqGR))<-gsub("\\.","-",colnames(mcols(cggcFreqGR)))
 
 # save merged and sorted methylation gr
 saveRDS(cggcFreqGR,paste0(path,"/rds/methFreqCombinedCGGC_",seqDate,"_",expName,"_GR.rds"))
+
+rm(list=c("methFreqGR"))
+cggcFreqGR<-readRDS(paste0(path,"/rds/methFreqCombinedCGGC_",seqDate,"_",expName,"_GR.rds"))
+
 
 # keep only methyltion frequency data
 onlyM<-grep("_M$",colnames(mcols(cggcFreqGR)))
@@ -342,7 +352,7 @@ if (dataType=="amp") {
 ###################################################
 
 pdf(paste0(path,"/plots/CorrelationBetweenSamples_",seqDate,"_",expName,".pdf"),width=8,height=11,paper="a4")
-cggcFreqGR<-cggcFreqGR[which(rowSums(as.data.frame(mcols(cggcFreqGR))!=1)==3),]
+cggcFreqGR<-cggcFreqGR[which(rowSums(as.data.frame(mcols(cggcFreqGR))!=1)==length(samples)),]
 #avoid plotting too many points - randomly choose 10,000 if more than that
 set.seed(1)
 if (length(cggcFreqGR)>1e4) {
@@ -404,7 +414,7 @@ grToBw(smDSMF,dataCols,bwPath=paste0(path,"/bigwig"),
        filenamePrefix=paste0("w",w,"smDSMF_"),
        urlPrefixForUCSC="http://www.meister.izb.unibe.ch/ucsc/")
 
-
+rm(list=c("smDSMF","dataCols","dsmf_all","cggcFreqGR"))
 
 
 
