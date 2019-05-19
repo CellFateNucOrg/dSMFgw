@@ -168,7 +168,7 @@ ggsave(paste0(path,"/plots/allC_convRateStats_",seqDate,"_",expName,".pdf"),plot
 #export(bad,paste0(path,"/bedgraph/badCs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodCs.bedgraph"),format="bedgraph")
 
-rm(list=c("Cs","p","p1*,"p2","p3"))
+rm(list=c("Cs","p","p1","p2","p3"))
 
 
 ###############################################################################################
@@ -230,7 +230,7 @@ ggsave(paste0(path,"/plots/CGs_methStats_",seqDate,"_",expName,".pdf"),plot=p,de
 #export(bad,paste0(path,"/bedgraph/badCGs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodCGs.bedgraph"),format="bedgraph")
 
-rm(list=c("CGs","p","p1*,"p2","p3"))
+rm(list=c("CGs","p","p1","p2","p3"))
 
 
 
@@ -293,7 +293,7 @@ ggsave(paste0(path,"/plots/GCs_methStats_",seqDate,"_",expName,".pdf"),plot=p,de
 #export(bad,paste0(path,"/bedgraph/badGCs.bedgraph"),format="bedgraph")
 #export(good,paste0(path,"/bedgraph/goodGCs.bedgraph"),format="bedgraph")
 
-rm(list=c("GCs","p","p1*,"p2","p3"))
+rm(list=c("GCs","p","p1","p2","p3"))
 
 
 
