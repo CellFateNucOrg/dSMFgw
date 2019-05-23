@@ -446,8 +446,8 @@ if (dataType=="amp") { # only execute of it is amplicon data
   regionType="rawAmp"
 
   allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8, 
-					   maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
@@ -459,11 +459,11 @@ if (dataType=="amp") { # only execute of it is amplicon data
   #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
     plotAllMatrices(allSampleMats, samples, regionGRs=amplicons, featureGRs=ampTSS, featureLabel="TSS",
-                    regionType=regionType, maxNAfraction=0.2, withAvr=FALSE, includeInFileName=seqDate,
+                    regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE, includeInFileName=seqDate,
                     drawArrow=TRUE)
 
     plotAllMatrices(allSampleMats, samples, regionGRs=amplicons, featureGRs=ampTSS, featureLabel="TSS",
-                    regionType=regionType, maxNAfraction=0.2, withAvr=TRUE, includeInFileName=seqDate,
+                    regionType=regionType, maxNAfraction=maxNAfraction, withAvr=TRUE, includeInFileName=seqDate,
                     drawArrow=TRUE)
 
 
@@ -503,8 +503,8 @@ mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
 allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                         regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8, 
-					 maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+                                         regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
 
 saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -535,11 +535,11 @@ TSSrelCoord<-convertGRtoRelCoord(TSS,1,anchorPoint="middle")
 tssWinRelCoord<-convertGRtoRelCoord(TSS,winSize,anchorPoint="middle")
 
 plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
-                featureLabel="TSS", regionType=regionType, maxNAfraction=0.2, withAvr=FALSE,
+                featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE,
                 includeInFileName=seqDate, drawArrow=FALSE)
 
 plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
-                featureLabel="TSS", regionType=regionType, maxNAfraction=0.2, withAvr=TRUE,
+                featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=TRUE,
                 includeInFileName=seqDate, drawArrow=FALSE)
 
 
@@ -596,8 +596,8 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8,
-					   maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
+                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -669,8 +669,8 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                             regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=0.8,
-					     maxNAfraction=0.2, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
+                                             regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+					     maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
