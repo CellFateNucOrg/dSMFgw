@@ -20,6 +20,8 @@ numThreads=$3
 
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
+fwdR=${fileList[0]}
+revR=${fileList[1]}
 
 # setup up a conditional statement to avoid repeating already executed steps
 if [[ "$trimmed" = "FALSE" ]] 
@@ -67,7 +69,7 @@ mkdir -p qc/trim
 
 #java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
-java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} ${fileList[0]} ${fileList[1]} -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
+java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar -threads ${numThreads} PE ${fwdR} ${revR} -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 
 # redo qc on trimmed reads	
@@ -86,14 +88,14 @@ source activate bwameth
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
 then
-	python ${BWAMETH} index ${genomefile}
+	${BWAMETH} index ${genomefile}
 fi
 
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-python ${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
-#python ${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
+#${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 
 # convert to bam file to save space

@@ -22,7 +22,7 @@ expName=dS02-4amp
 
 # if script crashes or runs out of time you can avoid re-running cutadapt and trimmomatic by setting this to TRUE
 # normally this should be set to FALSE
-trimmed=TRUE
+trimmed=FALSE
 
 
 ###################################################
@@ -37,7 +37,7 @@ genomeVer=WS235
 #genomefile= ${HOME}/Documents/MeisterLab/GenomeVer/sequence/c_elegans.PRJNA13758.WS250.genomic.fa # local
 
 # path to trimmomatic program
-#trimmomaticDIR='/software/UHTS/Analysis/trimmomatic/0.36/bin'
+trimmomaticDIR='/software/UHTS/Analysis/trimmomatic/0.36/bin'
 # path to trimmomatic adaptor file
 trimAdapterFile='./TruSeq_2-3_PE.fa'
 
