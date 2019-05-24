@@ -2,7 +2,7 @@
 
 ## Allocate resources
 #SBATCH --time=2-00:00:00
-#SBATCH --array=1
+#SBATCH --array=2-3
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
