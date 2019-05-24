@@ -78,6 +78,7 @@ fi # end trimmed brackets
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
+source activate bwameth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -243,14 +244,6 @@ echo "min\tmax\tmedian\tmean" > qc/aln/${bname}_${seqDate}_depthStats.txt
 ./R/mmmm.r < qc/aln/${bname}_${seqDate}_depthCol.txt >> qc/aln/${bname}_${seqDate}_depthStats.txt
         #depthStats=`./R/mmmm.r < $^`
         #echo ${depthStats}
-MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
-nly reads that map to the same chromosome
-# write header to file temporarily
-samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
-
-# extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs),
-# and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
         #echo "${depthStats}" >> $@
 
 rm qc/aln/${bname}_${seqDate}_depthCol.txt
@@ -278,7 +271,7 @@ fi
 #######################################################
 
 #activate environment
-source activate methyldackel
+#source activate methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
