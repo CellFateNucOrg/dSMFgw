@@ -6,9 +6,9 @@ Pipeline for analysing genome-wide dSMF data. This pipeline aligns dSMF reads wi
 
 ```
 # installation instructions for bwa-meth. based on https://github.com/brentp/bwa-meth
-conda create --name bwaMeth python=2.7
+conda create --name bwameth python=3.7
 
-source activate bwaMeth
+source activate bwameth
 
 pip install toolshed
 
@@ -20,25 +20,28 @@ cd bwa-meth-master/
 python setup.py install --user
 
 # bwa-meth will be at: ~/.local/bin/bwameth.py
-# add a line to .bashrc to point to it:
-cp ~/.bashrc ~/.bashrc_backup
-echo "export BWAMETH=${HOME}/.local/bin/bwameth.py" >> ~/.bashrc
+# can run using
+
+conda activate bwameth
+python bwameth.py
+
 
 # Note: you must have samtools and bwa-mem modules activated
+module add vital-it
+module add UHTS/Analysis/samtools/1.8
+source activate bwameth
 
-#Before using it you must index the genome
+#Before using it you must index the genomecon
 
 
-#leave environment
-source deactivate bwameth
 ```
 
 ## Installing MethylDackel
 ```
-conda create --name methyldackel python=3.7
-conda activate methyldackel
+
+conda activate bwameth
 conda install -c bioconda methyldackel
-conda deactivate
+conda deactivatemeth
 ````
 
 Note, this is only version 3.0.
