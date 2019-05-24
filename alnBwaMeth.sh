@@ -54,21 +54,21 @@ fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./qc/cutadapt
 
 
 
-#######################################################
-## quality trim reads with Trimmomatic               ##
-#######################################################
-
-#graphical parameter for bash shell
-export DISPLAY=:0
-
-#use trimmomatic to trim
-mkdir -p trim
-mkdir -p qc/trim
-
-java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
-
-# redo qc on trimmed reads	
-fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
+########################################################
+### quality trim reads with Trimmomatic               ##
+########################################################
+#
+##graphical parameter for bash shell
+#export DISPLAY=:0
+#
+##use trimmomatic to trim
+#mkdir -p trim
+#mkdir -p qc/trim
+#
+#java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
+#
+## redo qc on trimmed reads	
+#fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 
 
 fi # end trimmed brackets
@@ -88,8 +88,8 @@ fi
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
-#${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
+#${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 
 # convert to bam file to save space
@@ -299,21 +299,21 @@ fi
 
 #source deactivate
 
-#######################################################
-## split f and r strand for single molecule matrix calling             
-#######################################################
-
-# write header to file temporarily
-samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
-
-# separate rows that have f or r in YD:Z tag
-# and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
-samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
-rm ${bname}_${seqDate}.header.sam
-
-samtools index aln/${bname}_${seqDate}.noOLf.bam
-samtools index aln/${bname}_${seqDate}.noOLr.bam
+########################################################
+### split f and r strand for single molecule matrix calling             
+########################################################
+#
+## write header to file temporarily
+#samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
+#
+## separate rows that have f or r in YD:Z tag
+## and combine with header into a new bam file.
+#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
+#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
+#rm ${bname}_${seqDate}.header.sam
+#
+#samtools index aln/${bname}_${seqDate}.noOLf.bam
+#samtools index aln/${bname}_${seqDate}.noOLr.bam
 
 #######################################################
 ## Prepare RDS of genome CG and GC motifs            ##
