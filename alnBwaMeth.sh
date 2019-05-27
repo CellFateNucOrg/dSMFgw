@@ -78,6 +78,7 @@ fi # end trimmed brackets
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
+source activate bwameth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -278,7 +279,7 @@ fi
 #######################################################
 
 #activate environment
-source activate methyldackel
+source activate bwameth
 
 mkdir -p methCalls
 mkdir -p perRead
@@ -299,21 +300,21 @@ fi
 
 #source deactivate
 
-#######################################################
-## split f and r strand for single molecule matrix calling             
-#######################################################
-
-# write header to file temporarily
-samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
-
-# separate rows that have f or r in YD:Z tag
-# and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
-samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
-rm ${bname}_${seqDate}.header.sam
-
-samtools index aln/${bname}_${seqDate}.noOLf.bam
-samtools index aln/${bname}_${seqDate}.noOLr.bam
+########################################################
+### split f and r strand for single molecule matrix calling             
+########################################################
+#
+## write header to file temporarily
+#samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
+#
+## separate rows that have f or r in YD:Z tag
+## and combine with header into a new bam file.
+#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
+#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
+#rm ${bname}_${seqDate}.header.sam
+#
+#samtools index aln/${bname}_${seqDate}.noOLf.bam
+#samtools index aln/${bname}_${seqDate}.noOLr.bam
 
 #######################################################
 ## Prepare RDS of genome CG and GC motifs            ##
