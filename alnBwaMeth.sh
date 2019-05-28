@@ -162,36 +162,46 @@ rm aln/${bname}_${seqDate}.noDup.bam
 ## Filter by mapping score, orientation, same chr    ##
 #######################################################
 
-# keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
+## keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
+#if [[ "$dataType" = "gw" ]]
+#then
+#	bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters_noDup.json
+#else
+#        bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
+#fi
+#
+#
+## keep only reads that map to the same chromosome
+## write header to file temporarily
+#samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
+#
+## extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
+## and combine with header into a new bam file.
+#samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
+#
+#
+#rm ${bname}_${seqDate}.header.sam
+##rm aln/${bname}_${seqDate}.sorted.bam
+#
+## for simple samtools filtering:
+## NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
+## 4    read unmapped
+## 8    mate unmapped
+## 256  not primary alignment
+## 512  read fails platform/vendor quality checks
+## 1024 read is PCR or optical duplicate
+## 2048 Supplementary alignment
+
+
+samtools view -b -f 2 aln/${bname}_${seqDate}.sorted.bam -o aln/${bname}_${seqDate}.filt2.bam
+
 if [[ "$dataType" = "gw" ]]
 then
-	bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters_noDup.json
+	samtools view -b -F 3852 aln/${bname}_${seqDate}.filt2.bam -o aln/${bname}_${seqDate}.filt3.bam
 else
-        bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
+	# keep duplicates for amplicons
+	samtools view -b -F 2828 aln/${bname}_${seqDate}.filt2.bam -o aln/${bname}_${seqDate}.filt3.bam
 fi
-
-
-# keep only reads that map to the same chromosome
-# write header to file temporarily
-samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
-
-# extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
-# and combine with header into a new bam file.
-samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
-
-
-rm ${bname}_${seqDate}.header.sam
-#rm aln/${bname}_${seqDate}.sorted.bam
-
-# for simple samtools filtering:
-# NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
-# 4    read unmapped
-# 8    mate unmapped
-# 256  not primary alignment
-# 512  read fails platform/vendor quality checks
-# 1024 read is PCR or optical duplicate
-# 2048 Supplementary alignment
-
 
 
 ########################################################
