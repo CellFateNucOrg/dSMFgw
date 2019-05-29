@@ -39,7 +39,8 @@ genomeVer=WS235
 # path to trimmomatic program
 trimmomaticDIR='/software/UHTS/Analysis/trimmomatic/0.36/bin'
 # path to trimmomatic adaptor file
-trimAdapterFile='./TruSeq_2-3_PE.fa'
+#trimAdapterFile='./TruSeq_2-3_PE.fa'
+trimAdapterFile=/software/UHTS/Analysis/trimmomatic/0.36/bin/adapters/TruSeq3-PE.fa
 
 # install bwa-meth and bamutil programmes and then set the following variables in the ~/.bashrc 
 # using the path to the installation location. e.g.
