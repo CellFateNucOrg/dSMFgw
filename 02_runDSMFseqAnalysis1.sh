@@ -14,7 +14,7 @@ module add UHTS/Analysis/MultiQC/1.7;
 module add UHTS/Analysis/samtools/1.8;
 
 # Collect various QC data produced by previous script together
-#multiqc ./fastQC
+multiqc ./qc
 
 # Call methylation and do plots
 source ./varSettings.sh
