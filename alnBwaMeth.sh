@@ -96,7 +96,7 @@ fi
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-${BWAMETH} --threads ${numThreads} --reference ${genomefile} -E 2 trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz -E 2 > aln/${bname}_${seqDate}.sam
 #${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 
