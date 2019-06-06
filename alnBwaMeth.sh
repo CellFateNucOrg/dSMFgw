@@ -85,7 +85,7 @@ fi # end trimmed brackets
 
 source ${HOME}/.bashrc
 source ${CONDA_ACTIVATE}
-source activate bwameth
+conda activate bwameth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -194,9 +194,10 @@ rm aln/${bname}_${seqDate}.noDup.bam
 ## 1024 read is PCR or optical duplicate
 ## 2048 Supplementary alignment
 
-
+# keep only reads mapped as proper pair
 samtools view -b -f 2 aln/${bname}_${seqDate}.sorted.bam -o aln/${bname}_${seqDate}.filt2.bam
 
+# remove reads that fail qc, are not primary alignments, and for GW data only - remove duplicates
 if [[ "$dataType" = "gw" ]]
 then
 	samtools view -b -F 3852 aln/${bname}_${seqDate}.filt2.bam -o aln/${bname}_${seqDate}.filt3.bam
@@ -287,7 +288,7 @@ fi
 #######################################################
 
 #activate environment
-#source activate bwameth
+#conda activate bwameth
 
 mkdir -p methCalls
 mkdir -p perRead
