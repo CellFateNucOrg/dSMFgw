@@ -84,8 +84,7 @@ fi # end trimmed brackets
 #######################################################
 
 source ${HOME}/.bashrc
-source ${CONDA_ACTIVATE}
-conda activate bwameth
+source ${CONDA_ACTIVATE} bwameth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
