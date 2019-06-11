@@ -1,8 +1,8 @@
 #! /usr/bin/bash
 
 ## Allocate resources
-#SBATCH --time=3-00:00:00
-#SBATCH --array=1-2
+#SBATCH --time=1-00:00:00
+#SBATCH --array=1-3
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
@@ -15,7 +15,7 @@
 module add vital-it;
 module load R/3.5.1;
 module add UHTS/Quality_control/fastqc/0.11.5;      #fastqc
-module add UHTS/Quality_control/cutadapt/1.13;     #cutadapt
+#module add UHTS/Quality_control/cutadapt/1.13;     #cutadapt
 module add UHTS/Analysis/trimmomatic/0.36;
 module add UHTS/Analysis/samtools/1.8;
 module add UHTS/Analysis/picard-tools/2.18.11;

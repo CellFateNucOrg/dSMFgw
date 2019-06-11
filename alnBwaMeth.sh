@@ -20,8 +20,6 @@ numThreads=$3
 
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
-#fwdR=${fileList[0]}
-#revR=${fileList[1]}
 
 # setup up a conditional statement to avoid repeating already executed steps
 if [[ "$trimmed" = "FALSE" ]] 
@@ -84,8 +82,7 @@ fi # end trimmed brackets
 #######################################################
 
 source ${HOME}/.bashrc
-source ${CONDA_ACTIVATE}
-conda activate bwameth
+source ${CONDA_ACTIVATE} bwameth
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -96,7 +93,7 @@ fi
 # align sequences to meth converted genome with bwameth
 
 mkdir -p aln
-${BWAMETH} --threads ${numThreads} --reference ${genomefile} -E 2 trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz > aln/${bname}_${seqDate}.sam
+${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz -E 2 > aln/${bname}_${seqDate}.sam
 #${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
 
 
