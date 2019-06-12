@@ -20,8 +20,6 @@ numThreads=$3
 
 # get foward and reverse read files for this sample
 fileList=( `ls ../rawData/${bname}*.fastq.gz` )
-#fwdR=${fileList[0]}
-#revR=${fileList[1]}
 
 # setup up a conditional statement to avoid repeating already executed steps
 if [[ "$trimmed" = "FALSE" ]] 
