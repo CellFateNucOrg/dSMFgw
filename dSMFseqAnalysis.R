@@ -33,13 +33,6 @@ library(ggpubr)
 #library(nanodsmf)
 library(methMatrix)
 
-# collect citations for packages used
-packageBib<-toBibtex(c(citation("rtracklayer"),
-                       citation("RColorBrewer"),
-                       citation("GGally"),
-                       citation("gridExtra"),
-                       citation("dplyr"),
-                       citation("ggpubr")))
 
 
 #####################
@@ -75,7 +68,7 @@ maxNAfraction=0.2
 # assume motif file and bed files are located in the same directory as the genomeFile and their name is
 # derived from it (as created by the getGenomeMotifs.R script
 motifFile=gsub("\\.fa","\\.CGGC_motifs.RDS",genomeFile)
-gnmMotifGR<-readRDS(motifFile)
+genomeMotifGR<-readRDS(motifFile)
 bedFilePrefix=gsub("\\.fa","",genomeFile)
 
 
@@ -446,7 +439,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
   regionType="rawAmp"
 
   allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
 					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -498,12 +491,12 @@ if (dataType=="amp"){
 }
 
 regionType="ampTSS"
-tssWin<-ampTSS
+tssWin<-ampenomeS
 mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
 allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                         regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+                                         regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
 					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
 
@@ -596,7 +589,7 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate,
 					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
@@ -669,7 +662,7 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                             regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+                                             regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate,
 					     maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
