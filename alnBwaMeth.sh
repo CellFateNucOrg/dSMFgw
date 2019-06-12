@@ -85,6 +85,13 @@ fi # end trimmed brackets
 
 source ${HOME}/.bashrc
 source ${CONDA_ACTIVATE} bwameth
+
+aligned=TRUE
+
+# setup up a conditional statement to avoid repeating already executed steps
+if [[ "$aligned" = "FALSE" ]]
+then
+
 	
 # convert and index genome file for bwameth alignment
 if [[ ! -f ${genomefile}.bwameth.c2t ]]
@@ -279,7 +286,7 @@ else
 fi
 
 
-
+fi # end of aligned
 
 
 #######################################################
@@ -287,7 +294,9 @@ fi
 #######################################################
 
 #activate environment
-#conda activate bwameth
+#source ${HOME}/.bashrc
+echo info --envs
+source ${CONDA_ACTIVATE} bwameth
 
 mkdir -p methCalls
 mkdir -p perRead
@@ -296,17 +305,19 @@ mkdir -p mbias
 if [[ "$dataType" = "gw" ]]
 then
 	MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
-	MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	echo "finished methyldackel extract"
 	MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
+	MethylDackel perRead -@ ${numThreads} -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
 else
 	# do not remove duplicates so change the default ignoreFlags (-F)
 	MethylDackel extract --CHH --CHG -o methCalls/${bname}_${seqDate} -F 2816 -d 1 -@ ${numThreads} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
+	echo "finished methyldackel extract"
+	MethylDackel mbias ${genomefile} aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
 	MethylDackel perRead -@ ${numThreads} -F 2816 -o perRead/${bname}_${seqDate} ${genomefile} aln/${bname}_${seqDate}.noOL.bam
-	MethylDackel mbias ${genomefile} -F 2816 aln/${bname}_${seqDate}.noOL.bam mbias/${bname}_${seqDate}
 fi
 
 
-conda deactivate
+
 
 ########################################################
 ### split f and r strand for single molecule matrix calling             
