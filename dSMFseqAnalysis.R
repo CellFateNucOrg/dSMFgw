@@ -509,11 +509,8 @@ saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"
 ###################################################
 
 
-allSampleRelCoordMats<-list()
-for (i in seq_along(samples)) {
-  allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                            grs=tssWin,anchorCoord=winSize/2)
-}
+allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+
 saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
@@ -603,11 +600,9 @@ if (dataType=="gw") {
 
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-    allSampleRelCoordMats<-list()
-    for (i in seq_along(samples)) {
-      allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                                grs=tssWin,anchorCoord=winSize/2)
-    }
+ 
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+	
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
@@ -676,11 +671,9 @@ if (dataType=="gw") {
 
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-    allSampleRelCoordMats<-list()
-    for (i in seq_along(samples)) {
-      allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                                grs=tssWin,anchorCoord=winSize/2)
-    }
+
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+
 
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
