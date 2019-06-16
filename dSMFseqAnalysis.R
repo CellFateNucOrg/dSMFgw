@@ -491,7 +491,7 @@ if (dataType=="amp"){
 }
 
 regionType="ampTSS"
-tssWin<-ampenomeS
+tssWin<-ampTSS
 mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
