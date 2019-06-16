@@ -2,8 +2,8 @@
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
 #SBATCH --job-name="feb18"
-#SBATCH --time=3-00:00:00
-#SBATCH --partition=all
+#SBATCH --time=0-00:10:00
+#SBATCH --partition=debug
 #SBATCH --mem-per-cpu=64G
 
 module add vital-it

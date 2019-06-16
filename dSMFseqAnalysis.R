@@ -511,7 +511,7 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
-allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
 
 saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
@@ -603,7 +603,7 @@ if (dataType=="gw") {
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
  
-    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType,  anchorCoord=winSize/2)
 	
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
@@ -674,7 +674,7 @@ if (dataType=="gw") {
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
-    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats,grs=tssWin,anchorCoord=winSize/2)
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
 
 
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
