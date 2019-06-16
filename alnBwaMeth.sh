@@ -36,23 +36,6 @@ mkdir -p ./qc/rawData
 fastqc -t ${numThreads} ${fileList[@]} -o ./qc/rawData
 
 
-########################################################
-### trim adaptors with cutadapt                       ##
-########################################################
-#
-## use cutadapt to trim
-#mkdir -p cutadapt
-#cutadapt -a AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC \
-#                -A AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT \
-#                -o cutadapt/${bname}_${seqDate}_R1.fastq.gz -p cutadapt/${bname}_${seqDate}_R2.fastq.gz \
-#                ${fileList[@]} 
-#
-#
-##redo qc on cut reads
-#mkdir -p qc/cutadapt
-#fastqc cutadapt/${bname}_${seqDate}_R?.fastq.gz -o ./qc/cutadapt 
-
-
 
 #######################################################
 ## quality trim reads with Trimmomatic               ##
@@ -64,8 +47,6 @@ export DISPLAY=:0
 #use trimmomatic to trim
 mkdir -p trim
 mkdir -p qc/trim
-
-#java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:50 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} ${fileList[@]} -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:10 MINLEN:36 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
@@ -117,6 +98,7 @@ rm aln/${bname}_${seqDate}.sam
 mkdir -p qc/aln
 samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
 samtools flagstat aln/${bname}_${seqDate}.sort.bam > qc/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
+
 #rm aln/${bname}_${seqDate}.sort.bam
 
 
@@ -127,6 +109,8 @@ samtools flagstat aln/${bname}_${seqDate}.sort.bam > qc/aln/report_flagstat_1_${
 
 #sort by query name for duplicate removal
 java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar SortSam I=aln/${bname}_${seqDate}.bam O=aln/${bname}_${seqDate}.qsort.bam SORT_ORDER=queryname TMP_DIR=${TMPDIR}
+
+rm aln/${bname}_${seqDate}.bam	
 
 # remove duplicates with picard (path to picard should be set in $PICARD variable in .bash_profile or in session)
 # Note that to mark unmapped mates of mapped records and supplementary/secondary alignments as duplicates the bam
@@ -159,7 +143,7 @@ samtools sort -o aln/${bname}_${seqDate}.sorted.bam -@ ${numThreads} aln/${bname
 
 # get alignment stats
 samtools flagstat  aln/${bname}_${seqDate}.sorted.bam > qc/aln/report_flagstat_2_${bname}_${seqDate}_noDup.txt
-	
+
 rm aln/${bname}_${seqDate}.noDup.bam
 
 
@@ -168,27 +152,6 @@ rm aln/${bname}_${seqDate}.noDup.bam
 ## Filter by mapping score, orientation, same chr    ##
 #######################################################
 
-## keep only reads that have Q>=30, both are mapped and in a FR or RF orientation.
-#if [[ "$dataType" = "gw" ]]
-#then
-#	bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters_noDup.json
-#else
-#        bamtools filter -in aln/${bname}_${seqDate}.sorted.bam -out aln/${bname}_${seqDate}.filt2.bam  -script myBamFilters.json
-#fi
-#
-#
-## keep only reads that map to the same chromosome
-## write header to file temporarily
-#samtools view -H aln/${bname}_${seqDate}.filt2.bam >  ${bname}_${seqDate}.header.sam
-#
-## extract rows where the 7th column has "=" (same chromosome) and the 9th column has insert length!=0 (found in wrongly oriented pairs), 
-## and combine with header into a new bam file.
-#samtools view aln/${bname}_${seqDate}.filt2.bam | awk '($7=="=" && $9!="0" )' | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.filt3.bam
-#
-#
-#rm ${bname}_${seqDate}.header.sam
-##rm aln/${bname}_${seqDate}.sorted.bam
-#
 ## for simple samtools filtering:
 ## NOTE: sam flag 3852 (if want supl alignments, use 1804) means excluding and of the following:
 ## 4    read unmapped
@@ -227,7 +190,7 @@ java -Xms1g -Xmx8g -jar ${picardDIR}/picard.jar CollectInsertSizeMetrics I=aln/$
 mkdir -p qc/aln/file3_${bname}
 qualimap bamqc -bam aln/${bname}_${seqDate}.filt3.bam -c --java-mem-size=8G -outdir qc/aln/filt3_${bname} -outfile ${bname}_${seqDate}_filt3_report_qualimap.pdf -outformat PDF
 
-#rm aln/${bname}_${seqDate}.filt2.bam
+rm aln/${bname}_${seqDate}.filt2.bam
 
 ########################################################
 ### clip overlap between reads                        ##
@@ -238,7 +201,7 @@ ${BAMUTIL} clipOverlap --in aln/${bname}_${seqDate}.filt3.bam --out aln/${bname}
 # index bam files for QuasR input
 samtools index aln/${bname}_${seqDate}.noOL.bam
 
-#rm aln/${bname}_${seqDate}.filt3.bam
+rm aln/${bname}_${seqDate}.filt3.bam
 
 
 ########################################################
@@ -291,10 +254,15 @@ fi # end of aligned
 ## extract methylation with MethylDackel             ##
 #######################################################
 
+<<<<<<< HEAD
 #activate environment
 #source ${HOME}/.bashrc
 echo info --envs
 source ${CONDA_ACTIVATE} bwameth
+=======
+#source ${HOME}/.bashrc
+#source ${CONDA_ACTIVATE} bwameth
+>>>>>>> da03bbb8859ecaee6a36dad3db56f2507454973b
 
 mkdir -p methCalls
 mkdir -p perRead
@@ -317,21 +285,6 @@ fi
 
 
 
-########################################################
-### split f and r strand for single molecule matrix calling             
-########################################################
-#
-## write header to file temporarily
-#samtools view -H aln/${bname}_${seqDate}.noOL.bam >  ${bname}_${seqDate}.header.sam
-#
-## separate rows that have f or r in YD:Z tag
-## and combine with header into a new bam file.
-#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:f" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLf.bam
-#samtools view aln/${bname}_${seqDate}.noOL.bam | grep "YD:Z:r" | cat ${bname}_${seqDate}.header.sam - | samtools view -b - -o aln/${bname}_${seqDate}.noOLr.bam
-#rm ${bname}_${seqDate}.header.sam
-#
-#samtools index aln/${bname}_${seqDate}.noOLf.bam
-#samtools index aln/${bname}_${seqDate}.noOLr.bam
 
 #######################################################
 ## Prepare RDS of genome CG and GC motifs            ##
