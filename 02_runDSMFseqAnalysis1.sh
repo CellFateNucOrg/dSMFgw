@@ -1,8 +1,8 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="feb18"
-#SBATCH --time=1-00:10:00
+#SBATCH --job-name="nov2018amp"
+#SBATCH --time=2-00:10:00
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=64G
 

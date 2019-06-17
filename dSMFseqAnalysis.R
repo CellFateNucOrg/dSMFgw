@@ -495,12 +495,12 @@ tssWin<-ampTSS
 mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
-#allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-#                                        regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
-#					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
-#
-#
-#saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
+allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
+                                        regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
+					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+
+
+saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
 
