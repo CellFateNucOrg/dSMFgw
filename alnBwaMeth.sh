@@ -254,15 +254,9 @@ fi # end of aligned
 ## extract methylation with MethylDackel             ##
 #######################################################
 
-<<<<<<< HEAD
-#activate environment
-#source ${HOME}/.bashrc
+source ${HOME}/.bashrc
 echo info --envs
 source ${CONDA_ACTIVATE} bwameth
-=======
-#source ${HOME}/.bashrc
-#source ${CONDA_ACTIVATE} bwameth
->>>>>>> da03bbb8859ecaee6a36dad3db56f2507454973b
 
 mkdir -p methCalls
 mkdir -p perRead
