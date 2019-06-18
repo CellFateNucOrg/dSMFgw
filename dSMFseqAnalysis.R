@@ -522,8 +522,8 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionTy
 
 #allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-TSSrelCoord<-convertGRtoRelCoord(TSS,1,anchorPoint="middle")
-tssWinRelCoord<-convertGRtoRelCoord(TSS,winSize,anchorPoint="middle")
+TSSrelCoord<-convertGRtoRelCoord(ampTSS,1,anchorPoint="middle")
+tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
 
 plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
                 featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE,
@@ -541,7 +541,7 @@ plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featur
 
 #allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-tssWinRelCoord<-convertGRtoRelCoord(TSS,winSize,anchorPoint="middle")
+tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
 
 allSampleMetaMethFreqDF<-getAllSampleMetaMethFreq(allSampleRelCoordMats,samples,regionGRs=tssWinRelCoord,
                                                    minReads=10)
