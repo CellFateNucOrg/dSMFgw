@@ -552,7 +552,7 @@ saveRDS(allSampleMetaMethFreqDF,paste0(path,"/rds/allSampleMetaMethFreqDF_",regi
 ### plot metagene by sample
 mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="pdf",
+ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
        width=20,height=20,units="cm")
 
 
@@ -626,7 +626,7 @@ if (dataType=="gw") {
     ### plot metagene by sample
     mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="pdf",
+    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
            width=20,height=20,units="cm")
 
 
@@ -695,7 +695,7 @@ if (dataType=="gw") {
     ### plot metagene by sample
     mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="pdf",
+    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
            width=20,height=20,units="cm")
 
 
