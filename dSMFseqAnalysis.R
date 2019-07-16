@@ -30,16 +30,8 @@ library(gridExtra)
 library(dplyr)
 library(tidyr)
 library(ggpubr)
-#library(nanodsmf)
 library(methMatrix)
 
-# collect citations for packages used
-packageBib<-toBibtex(c(citation("rtracklayer"),
-                       citation("RColorBrewer"),
-                       citation("GGally"),
-                       citation("gridExtra"),
-                       citation("dplyr"),
-                       citation("ggpubr")))
 
 
 #####################
@@ -75,7 +67,7 @@ maxNAfraction=0.2
 # assume motif file and bed files are located in the same directory as the genomeFile and their name is
 # derived from it (as created by the getGenomeMotifs.R script
 motifFile=gsub("\\.fa","\\.CGGC_motifs.RDS",genomeFile)
-gnmMotifGR<-readRDS(motifFile)
+genomeMotifGR<-readRDS(motifFile)
 bedFilePrefix=gsub("\\.fa","",genomeFile)
 
 
@@ -446,7 +438,7 @@ if (dataType=="amp") { # only execute of it is amplicon data
   regionType="rawAmp"
 
   allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
 					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
     saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
@@ -503,7 +495,7 @@ mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
 allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                         regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate, 
+                                        regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
 					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
 
@@ -515,12 +507,11 @@ saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"
 # convert merged matrices to relative coordinates
 ###################################################
 
+allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-allSampleRelCoordMats<-list()
-for (i in seq_along(samples)) {
-  allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                            grs=tssWin,anchorCoord=winSize/2)
-}
+
+allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
+
 saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
@@ -531,8 +522,8 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionTy
 
 #allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-TSSrelCoord<-convertGRtoRelCoord(TSS,1,anchorPoint="middle")
-tssWinRelCoord<-convertGRtoRelCoord(TSS,winSize,anchorPoint="middle")
+TSSrelCoord<-convertGRtoRelCoord(ampTSS,1,anchorPoint="middle")
+tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
 
 plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
                 featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE,
@@ -550,7 +541,7 @@ plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featur
 
 #allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-tssWinRelCoord<-convertGRtoRelCoord(TSS,winSize,anchorPoint="middle")
+tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
 
 allSampleMetaMethFreqDF<-getAllSampleMetaMethFreq(allSampleRelCoordMats,samples,regionGRs=tssWinRelCoord,
                                                    minReads=10)
@@ -561,7 +552,7 @@ saveRDS(allSampleMetaMethFreqDF,paste0(path,"/rds/allSampleMetaMethFreqDF_",regi
 ### plot metagene by sample
 mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="png",
+ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
        width=20,height=20,units="cm")
 
 
@@ -596,7 +587,7 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                           regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate,
 					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
@@ -610,11 +601,9 @@ if (dataType=="gw") {
 
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-    allSampleRelCoordMats<-list()
-    for (i in seq_along(samples)) {
-      allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                                grs=tssWin,anchorCoord=winSize/2)
-    }
+ 
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType,  anchorCoord=winSize/2)
+	
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
@@ -637,7 +626,7 @@ if (dataType=="gw") {
     ### plot metagene by sample
     mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="png",
+    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
            width=20,height=20,units="cm")
 
 
@@ -669,7 +658,7 @@ if (dataType=="gw") {
     tssWin<-resize(tssWin,width=winSize,fix="center")
 
     allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                             regionType=regionType, genomeMotifGR=gnmMotifGR, minConversionRate=minConversionRate,
+                                             regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate,
 					     maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=FALSE)
 
 
@@ -683,11 +672,9 @@ if (dataType=="gw") {
 
     #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-    allSampleRelCoordMats<-list()
-    for (i in seq_along(samples)) {
-      allSampleRelCoordMats[[samples[i]]]<-getRelativeCoordMats(matList=allSampleMats[[samples[i]]],
-                                                                grs=tssWin,anchorCoord=winSize/2)
-    }
+
+    allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
+
 
     saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
@@ -708,7 +695,7 @@ if (dataType=="gw") {
     ### plot metagene by sample
     mp<-plotDSMFmetageneDF(metageneDF=allSampleMetaMethFreqDF,maxPoints=10000)
 
-    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".png"),plot=mp,device="png",
+    ggsave(paste0(path,"/plots/metaGenePlots_",regionType,"_",seqDate,"_",expName,".pdf"),plot=mp,device="pdf",
            width=20,height=20,units="cm")
 
 
