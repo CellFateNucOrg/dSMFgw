@@ -45,7 +45,7 @@ trimAdapterFile=/software/UHTS/Analysis/trimmomatic/0.36/bin/adapters/TruSeq3-PE
 # install bwa-meth and bamutil programmes and then set the following variables in the ~/.bashrc 
 # using the path to the installation location. e.g.
 #export BWAMETHDIR=/home/ubelix/izb/semple/mySoftware/bwa-meth-master
-#export BAMUTIL=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
+export BAMUTIL=/home/ubelix/izb/semple/mySoftware/bamUtil/bin/bam
 picardDIR='/software/UHTS/Analysis/picard-tools/2.18.11/bin'
 
 

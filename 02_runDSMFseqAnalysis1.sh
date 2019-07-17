@@ -1,8 +1,9 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="feb18"
-#SBATCH --time=1-00:10:00
+#SBATCH --job-name="dSMF_Ccall"
+#SBATCH --time=1-00:00:00
+##SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=64G
 
@@ -12,7 +13,7 @@ module add UHTS/Analysis/MultiQC/1.7;
 module add UHTS/Analysis/samtools/1.8;
 
 # Collect various QC data produced by previous script together
-#multiqc -f ./qc
+multiqc -f ./qc
 
 # Call methylation and do plots
 source ./varSettings.sh
