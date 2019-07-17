@@ -101,7 +101,7 @@ mkdir -p qc/aln
 samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
 samtools flagstat aln/${bname}_${seqDate}.sort.bam > qc/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
 
-#rm aln/${bname}_${seqDate}.sort.bam
+rm aln/${bname}_${seqDate}.sort.bam
 
 
 
@@ -174,6 +174,9 @@ else
 	# keep duplicates for amplicons
 	samtools view -b -F 2828 aln/${bname}_${seqDate}.filt2.bam -o aln/${bname}_${seqDate}.filt3.bam
 fi
+
+
+rm aln/${bname}_${seqDate}.sorted.bam
 
 
 ########################################################
