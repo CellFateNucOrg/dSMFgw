@@ -51,6 +51,7 @@ mkdir -p qc/trim
 java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} ${fileList[@]} -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:10 MINLEN:36 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 
+
 # redo qc on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 
@@ -58,12 +59,13 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 fi # end trimmed brackets
 
 
+
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
-#source ${HOME}/.bashrc
-#source ${CONDA_ACTIVATE} methyldackel
+source ${HOME}/.bashrc
+source ${CONDA_ACTIVATE} methyldackel
 
 
 # setup up a conditional statement to avoid repeating already executed steps
@@ -79,6 +81,7 @@ fi
 
 # align sequences to meth converted genome with bwameth
 
+echo "doing bwa meth"
 mkdir -p aln
 ${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz -E 2 > aln/${bname}_${seqDate}.sam
 #${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
