@@ -62,10 +62,9 @@ fi # end trimmed brackets
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
-source ${HOME}/.bashrc
-source ${CONDA_ACTIVATE} bwameth
+#source ${HOME}/.bashrc
+#source ${CONDA_ACTIVATE} methyldackel
 
-aligned=TRUE
 
 # setup up a conditional statement to avoid repeating already executed steps
 if [[ "$aligned" = "FALSE" ]]
@@ -254,9 +253,9 @@ fi # end of aligned
 ## extract methylation with MethylDackel             ##
 #######################################################
 
-source ${HOME}/.bashrc
+#source ${HOME}/.bashrc
 echo info --envs
-source ${CONDA_ACTIVATE} bwameth
+source ${CONDA_ACTIVATE} methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
