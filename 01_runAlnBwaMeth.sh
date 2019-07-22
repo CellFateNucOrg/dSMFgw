@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 
 ## Allocate resources
-#SBATCH --time=2-00:00:00
+#SBATCH --time=1-12:00:00
 #SBATCH --array=1-2
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch

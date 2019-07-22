@@ -11,5 +11,5 @@
 
 
 
-./formatForUCSC.sh gwDSMFv16v20_Comb "Genome wide dSMF dS016 & dS020, Feb & May 2019 combined" ./bigwig/*.bw
+./formatForUCSC.sh gwDSMFv16v20_May "Genome wide dSMF dS016 & dS020, May 2019" ./bigwig/*.bw
 
