@@ -39,5 +39,6 @@ do
 	mv $bwFile ./bigwig/${shortName}/ce11/
 done
 
+# fix url path to bigwig files on web server
 sed s%http://www.meister.izb.unibe.ch/ucsc/%http://www.meister.izb.unibe.ch/ucsc/${shortName}/ce11/%g < ./bigwig/urlsToUpload.txt > ./bigwig/urlsToUploadTmp.txt
 mv ./bigwig/urlsToUploadTmp.txt ./bigwig/urlsToUpload.txt
