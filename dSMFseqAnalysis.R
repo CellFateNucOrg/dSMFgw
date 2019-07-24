@@ -23,14 +23,14 @@
 #############
 
 
-library(rtracklayer)
-library("RColorBrewer")
-library(GGally)
-library(gridExtra)
-library(dplyr)
-library(tidyr)
-library(ggpubr)
-library(methMatrix)
+suppressMessages(library(rtracklayer))
+suppressMessages(library("RColorBrewer"))
+suppressMessages(library(GGally))
+suppressMessages(library(gridExtra))
+suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
+suppressMessages(library(ggpubr))
+suppressMessages(library(methMatrix))
 
 
 
@@ -50,16 +50,15 @@ source('./R/variableSettings.R')
 options("scipen"=8, "digits"=4)
 options(device=pdf)
 
-# see ./R/variableSettings.R file which imports nost of its settings from the varSettings.sh file
-# Only the path to RDS files with genomic ranges for regions of amplicons and TSSs need to be added 
-# to ./R/variableSettings.R when working in a new environment. The variableSettings_example.R file 
-# should be downloaded from the repo and correctly filled out and saved without the _example 
-# extension.
+# see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
+# the script. the variableSettings_example.R file downloaded from the repo should be correctly
+# filled out and saved without the _example extension.
 
 
 # standard variables that should probably not be changed
 minConversionRate=0.8
 maxNAfraction=0.2
+
 
 # assume motif file and bed files are located in the same directory as the genomeFile and their name is
 # derived from it (as created by the getGenomeMotifs.R script
@@ -97,7 +96,26 @@ methFreqGR<-list()
 for (sampleName in samples) {
   baseFileName<-paste0(sampleName,"_",seqDate)
   methFreqGR[[sampleName]]<-getMethFreqGR(baseFileName,paste0(path,"/methCalls"),motifFile,minDepth=10)
+
+  # make bigwig coverage file for all Cs
+  Ccovbw<-sort(c(methFreqGR[[sampleName]]$CG,methFreqGR[[sampleName]]$GC, methFreqGR[[sampleName]]$C))
+  if (GenomeInfoDb::seqlevelsStyle(Ccovbw)!="UCSC") {
+  	Ccovbw_u<-wbToUcscGR(Ccovbw)
+  } else {
+  	Ccovbw_u<-Ccovbw
+  }
+
+  mcols(Ccovbw_u)<-NULL
+  Ccovbw_u$score<-mcols(Ccovbw)$readDepth
+  seqlengths(Ccovbw_u)<-seqlengths(Celegans)
+  # export coverage data with no smoothing
+  rtracklayer::export.bw(Ccovbw_u,con=paste0(path,"/bigwig/Ccov_",sampleName,".bw"))
+  line=paste0(urlPrefixForUCSC="http://www.meister.izb.unibe.ch/ucsc/Ccov_",sampleName,".bw")
+  write(line,file=paste0(path,"/bigwig/urlsToUpload.txt"),append=TRUE)
+  rm(list=c("Ccovbw","Ccovbw_u"))
 }
+
+
 
 ## save as rds for future access
 saveRDS(methFreqGR,paste0(path,"/rds/methFreqAllCsGRs_",seqDate,"_",dataType,".rds"))
@@ -147,6 +165,10 @@ p3<-ggplot(Cs,aes(x=methylated/readDepth,y=readDepth))+
 
 p<-marrangeGrob(list(p1,p2,p3),ncol=1,nrow=3)
 ggsave(paste0(path,"/plots/allC_convRateStats_",seqDate,"_",expName,".pdf"),plot=p,device="pdf",width=20,height=29,units="cm")
+
+
+
+
 
 #bad<-Cs[Cs$methPercent<80,]
 #bad$score<-bad$methPercent
