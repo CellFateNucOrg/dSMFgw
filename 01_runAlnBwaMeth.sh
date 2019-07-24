@@ -6,7 +6,7 @@
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="2x150maygw"
+#SBATCH --job-name="2x150gw"
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=8G

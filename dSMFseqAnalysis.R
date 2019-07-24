@@ -50,19 +50,16 @@ source('./R/variableSettings.R')
 options("scipen"=8, "digits"=4)
 options(device=pdf)
 
-# see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
-# the script. the variableSettings_example.R file downloaded from the repo should be correctly
-# filled out and saved without the _example extension.
+# see ./R/variableSettings.R file which imports nost of its settings from the varSettings.sh file
+# Only the path to RDS files with genomic ranges for regions of amplicons and TSSs need to be added 
+# to ./R/variableSettings.R when working in a new environment. The variableSettings_example.R file 
+# should be downloaded from the repo and correctly filled out and saved without the _example 
+# extension.
 
 
 # standard variables that should probably not be changed
 minConversionRate=0.8
 maxNAfraction=0.2
-
-
-# see ./R/variableSettings.R file. Some of these variables need to be adjusted before running
-# the script. the variableSettings_example.R file downloaded from the repo should be correctly
-# filled out and saved without the _example extension.
 
 # assume motif file and bed files are located in the same directory as the genomeFile and their name is
 # derived from it (as created by the getGenomeMotifs.R script
@@ -77,8 +74,6 @@ fileList<-fileList[ordered(fileList$SampleName),]
 samples<-fileList$SampleName
 
 
-
-#fileList$FileName<-sapply(fileList$FileName, function(x) {gsub("/home/ubelix/izb/semple/myData/20181119_dSMFv002-4amp_N2-182/bwaMeth/aln/","./aln/",x) })
 
 #################
 # Directories
