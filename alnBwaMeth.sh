@@ -51,6 +51,7 @@ mkdir -p qc/trim
 java -Xms1g -Xmx8g -jar ${trimmomaticDIR}/trimmomatic-0.36.jar PE -threads ${numThreads} ${fileList[@]} -baseout trim/${bname}_${seqDate}.fq.gz ILLUMINACLIP:${trimAdapterFile}:2:30:10:3:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:10 MINLEN:36 2> qc/trim/report_${bname}_${seqDate}_trimmomatic.txt
 
 
+
 # redo qc on trimmed reads	
 fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 
@@ -58,14 +59,14 @@ fastqc trim/${bname}_${seqDate}_*.fq.gz -o qc/trim
 fi # end trimmed brackets
 
 
+
 #######################################################
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
 source ${HOME}/.bashrc
-source ${CONDA_ACTIVATE} bwameth
+source ${CONDA_ACTIVATE} methyldackel
 
-aligned=TRUE
 
 # setup up a conditional statement to avoid repeating already executed steps
 if [[ "$aligned" = "FALSE" ]]
@@ -80,6 +81,7 @@ fi
 
 # align sequences to meth converted genome with bwameth
 
+echo "doing bwa meth"
 mkdir -p aln
 ${BWAMETH} --threads ${numThreads} --reference ${genomefile} trim/${bname}_${seqDate}_1P.fq.gz trim/${bname}_${seqDate}_2P.fq.gz -E 2 > aln/${bname}_${seqDate}.sam
 #${BWAMETH} --threads ${numThreads} --reference ${genomefile} cutadapt/${bname}_${seqDate}_R1.fastq.gz cutadapt/${bname}_${seqDate}_R2.fastq.gz > aln/${bname}_${seqDate}.sam
@@ -99,7 +101,7 @@ mkdir -p qc/aln
 samtools sort -o aln/${bname}_${seqDate}.sort.bam -@ ${numThreads} aln/${bname}_${seqDate}.bam 
 samtools flagstat aln/${bname}_${seqDate}.sort.bam > qc/aln/report_flagstat_1_${bname}_${seqDate}_bam.txt
 
-#rm aln/${bname}_${seqDate}.sort.bam
+rm aln/${bname}_${seqDate}.sort.bam
 
 
 
@@ -172,6 +174,9 @@ else
 	# keep duplicates for amplicons
 	samtools view -b -F 2828 aln/${bname}_${seqDate}.filt2.bam -o aln/${bname}_${seqDate}.filt3.bam
 fi
+
+
+rm aln/${bname}_${seqDate}.sorted.bam
 
 
 ########################################################
@@ -254,15 +259,9 @@ fi # end of aligned
 ## extract methylation with MethylDackel             ##
 #######################################################
 
-<<<<<<< HEAD
-#activate environment
 #source ${HOME}/.bashrc
 echo info --envs
-source ${CONDA_ACTIVATE} bwameth
-=======
-#source ${HOME}/.bashrc
-#source ${CONDA_ACTIVATE} bwameth
->>>>>>> da03bbb8859ecaee6a36dad3db56f2507454973b
+source ${CONDA_ACTIVATE} methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
