@@ -436,20 +436,20 @@ if (dataType=="amp") { # only execute of it is amplicon data
     #######
     # Extract all C positions within each amplicon (getCmethMatrix function)
     #######
-  regionType="rawAmp"
+    regionType="rawAmp"
 
-  allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
-                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
-					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
-
-    saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
+#    allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=amplicons,
+#                                           regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
+#					   maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+#
+#    saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
     #######
     # plot single read matrices for all amplicons
     #######
 
-  #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
+    allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
     plotAllMatrices(allSampleMats, samples, regionGRs=amplicons, featureGRs=ampTSS, featureLabel="TSS",
                     regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE, includeInFileName=seqDate,
