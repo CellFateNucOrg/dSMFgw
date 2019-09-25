@@ -99,15 +99,15 @@ for (sampleName in samples) {
 
   # make bigwig coverage file for all Cs
   Ccovbw<-sort(c(methFreqGR[[sampleName]]$CG,methFreqGR[[sampleName]]$GC, methFreqGR[[sampleName]]$C))
-  if (GenomeInfoDb::seqlevelsStyle(Ccovbw)!="UCSC") {
-  	Ccovbw_u<-wbToUcscGR(Ccovbw)
+  if ("UCSC" %in% GenomeInfoDb::seqlevelsStyle(Ccovbw)) {
+	Ccovbw_u<-Ccovbw  	
   } else {
-  	Ccovbw_u<-Ccovbw
+	Ccovbw_u<-wbToUcscGR(Ccovbw)
   }
 
   mcols(Ccovbw_u)<-NULL
   Ccovbw_u$score<-mcols(Ccovbw)$readDepth
-  seqlengths(Ccovbw_u)<-seqlengths(Celegans)
+  seqlengths(Ccovbw_u)<-seqlengths(Celegans)[1:length(seqlengths(Ccovbw_u))]
   # export coverage data with no smoothing
   rtracklayer::export.bw(Ccovbw_u,con=paste0(path,"/bigwig/Ccov_",sampleName,".bw"))
   line=paste0(urlPrefixForUCSC="http://www.meister.izb.unibe.ch/ucsc/Ccov_",sampleName,".bw")

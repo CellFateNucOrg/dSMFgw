@@ -2,11 +2,11 @@
 
 ## Allocate resources
 #SBATCH --time=1-12:00:00
-#SBATCH --array=1-2
+#SBATCH --array=1-4
 
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="2x150gw"
+#SBATCH --job-name="dS12-15gw"
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=8G
