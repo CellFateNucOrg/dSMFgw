@@ -54,7 +54,7 @@ You will need to add the path of the executable to the varSettings.sh file
 ## Install R libraries
 check the code at the beginning of 02_ script to see which libraries to install.
 
-# varSettings.sh
+## varSettings.sh
 most of what you have to change goes into the varSettings.sh file. An example file comes with the repository, copy it and change the name:
 ```
 cp varSettings_example.sh varSettings.sh
@@ -62,3 +62,6 @@ cp varSettings_example.sh varSettings.sh
 Then use a text editor to change verSettings.sh
 
 The only other changes you will have to make is to the number of array jobs in 01_ script: The number of jobs should be the same as the number of libraries you sent to sequence.
+
+# Running the scripts
+run the scripts using that sbatch wrapper scripts 01_ and 02_ in the order indicated by the number
