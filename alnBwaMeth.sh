@@ -64,8 +64,8 @@ fi # end trimmed brackets
 ## align to genome with BWA-meth and convert to bam  ##
 #######################################################
 
-#source ${HOME}/.bashrc
-source ${CONDA_ACTIVATE} bwaMeth
+source ${HOME}/.bashrc
+source ${CONDA_ACTIVATE} methyldackel
 
 
 # setup up a conditional statement to avoid repeating already executed steps
@@ -261,7 +261,7 @@ fi # end of aligned
 
 #source ${HOME}/.bashrc
 echo info --envs
-source ${CONDA_ACTIVATE} bwaMeth
+source ${CONDA_ACTIVATE} methyldackel
 
 mkdir -p methCalls
 mkdir -p perRead
