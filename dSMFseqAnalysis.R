@@ -512,12 +512,13 @@ mcols(tssWin)$TSS<-start(tssWin)
 tssWin<-resize(tssWin,width=winSize,fix="center")
 
 
-allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
-                                        regionType=regionType, genomeMotifGR=genomeMotifGR, minConversionRate=minConversionRate, 
-					 maxNAfraction=maxNAfraction, bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
+#allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList, genomeFile=genomeFile, regionGRs=tssWin,
+#                                        regionType=regionType, genomeMotifGR=genomeMotifGR, 
+#					 minConversionRate=minConversionRate, maxNAfraction=maxNAfraction, 
+#					 bedFilePrefix=NULL, path=path, convRatePlots=TRUE)
 
 
-saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
+#saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
 
@@ -528,9 +529,9 @@ saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"
 #allSampleMats<-readRDS(paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
-allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
+#allSampleRelCoordMats<-getRelativeCoordMats(matList=allSampleMats, regionGRs=tssWin, regionType=regionType, anchorCoord=winSize/2)
 
-saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
+#saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 
 #######
@@ -538,16 +539,16 @@ saveRDS(allSampleRelCoordMats,paste0(path,"/rds/allSampleRelCoordMats_",regionTy
 #######
 
 
-#allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
+allSampleRelCoordMats<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 TSSrelCoord<-convertGRtoRelCoord(ampTSS,1,anchorPoint="middle")
 tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
 
-plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
-                featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE,
-                includeInFileName=seqDate, drawArrow=FALSE)
+#plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
+#                featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=FALSE,
+#                includeInFileName=seqDate, drawArrow=FALSE)
 
-plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord[1:5], featureGRs=TSSrelCoord,
+plotAllMatrices(allSampleRelCoordMats, samples, regionGRs=tssWinRelCoord, featureGRs=TSSrelCoord,
                 featureLabel="TSS", regionType=regionType, maxNAfraction=maxNAfraction, withAvr=TRUE,
                 includeInFileName=seqDate, drawArrow=FALSE)
 
