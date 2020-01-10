@@ -8,7 +8,7 @@
 #SBATCH --mem-per-cpu=64G
 
 module add vital-it
-module load R/3.5.1
+module load R/3.6.1
 module add UHTS/Analysis/MultiQC/1.7;
 module add UHTS/Analysis/samtools/1.8;
 
