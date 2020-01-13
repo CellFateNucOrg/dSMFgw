@@ -87,19 +87,19 @@ matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDa
 # learn classes for single gene
 ################
 
+################
+# parameters
+################
+k_range = 2:8      # Number of classes to be found
+maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
+convergenceError = 10e-6
+numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
+xRange=c(-250,250)
+maxB=100 # Number of randomised matrices to generate
+outPath="./resultsEM"
+
 for (i in 1:nrow(matTable)) {
  
-  ################
-  # parameters
-  ################
-  k_range = 2:8      # Number of classes to be found
-  maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
-  convergenceError = 10e-6
-  numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
-  xRange=c(-250,250)
-  maxB=100 # Number of randomised matrices to generate
-  outPath="./resultsEM"
-
   ################
   # process matrix
   ################
