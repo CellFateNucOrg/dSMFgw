@@ -98,31 +98,38 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 outPath="./resultsEM"
 
+
+
+set.seed(1)
 for (i in 1:nrow(matTable)) {
  
   ################
   # process matrix
   ################
-  set.seed(1)
   # read in first matrix
+  print(paste("matrix number: ", i))
   regionName=matTable$region[i]
   sampleName=matTable$sample[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   print(paste("Clust", outFileBase))
   dataMatrix<-readRDS(matTable[i, "filename"])
   # remove NAs
-  dim(dataMatrix)
+  print("dimensions of dataMatrix: ")
+  print(dim(dataMatrix))
   dataMatrix<-removeAllNArows(dataMatrix)
-  dim(dataMatrix)
+  print("dimensions of dataMatrix after NA row removal:  ")
+  print(dim(dataMatrix))
   
   tryCatch( 
     {
-       runEMrangeClassNum(dataMatrix, k_range, convergenceError, maxIterations,
+	print("running EM for a range of class sizes")
+	#browser()
+	runEMrangeClassNum(dataMatrix, k_range, convergenceError, maxIterations,
                      repeats=numRepeats, outPath=outPath, xRange=xRange, 
                      outFileBase=paste(sampleName, regionName, sep="_"),
                      doIndividualPlots=FALSE)
-  
-       plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
+	print("plotting clutering metrics for a range of class sizes")
+	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
                        maxIterations, outPath, outFileBase)
     },
     error=function(e){"Matrix not valid"}

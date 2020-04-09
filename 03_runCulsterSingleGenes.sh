@@ -14,5 +14,5 @@ module load R/3.6.1
 # Call methylation and do plots
 source ./varSettings.sh
 
-Rscript clusterSingleGenes.R 
+Rscript --no-save --no-restore --verbose clusterSingleGenes.R 2>&1
 
