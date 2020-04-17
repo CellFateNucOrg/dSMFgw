@@ -16,7 +16,6 @@
 # Libraries
 #############
 
-
 suppressMessages(library(methMatrix))
 suppressMessages(library(EMclassifieR))
 
@@ -30,10 +29,14 @@ suppressMessages(library(EMclassifieR))
 source('./R/variableSettings.R')
 
 
-
 ##############
 # Variables
 ##############
+args = commandArgs(trailingOnly=TRUE)
+taskId=args[1]
+maxTasks=args[2]
+nThreads=args[3]
+
 options("scipen"=8, "digits"=4)
 options(device=pdf)
 
@@ -41,19 +44,6 @@ options(device=pdf)
 # standard variables that should probably not be changed
 minConversionRate=0.8
 maxNAfraction=0.2
-
-
-# assume motif file and bed files are located in the same directory as the genomeFile and their name is
-# derived from it (as created by the getGenomeMotifs.R script
-#motifFile=gsub("\\.fa","\\.CGGC_motifs.RDS",genomeFile)
-#genomeMotifGR<-readRDS(motifFile)
-#bedFilePrefix=gsub("\\.fa","",genomeFile)
-
-
-# assume sample table is stored in ./txt/bwameth_Aligned.txt
-#fileList<-read.delim("./txt/bwameth_Aligned.txt",stringsAsFactors=F)
-#fileList<-fileList[ordered(fileList$SampleName),]
-#samples<-fileList$SampleName
 
 
 
@@ -96,13 +86,20 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-outPath="./resultsEM"
+outPath=paste0(path,"/EMres")
+setSeed=FALSE
 
+if (!dir.exists(outPath)){
+  dir.create(outPath)
+}
 
+#split table indecies into nTasks number of groups
+taskSubList<-split(1:nrow(matTable),sort(1:nrow(matTable)%%maxTasks))
 
-set.seed(1)
-for (i in 1:nrow(matTable)) {
- 
+set.seed(200413)
+#for (i in 1:nrow(matTable)) {
+for (i in taskSubList[[taskId]]){
+
   ################
   # process matrix
   ################
@@ -123,14 +120,16 @@ for (i in 1:nrow(matTable)) {
   tryCatch( 
     {
 	print("running EM for a range of class sizes")
-	#browser()
-	runEMrangeClassNum(dataMatrix, k_range, convergenceError, maxIterations,
-                     repeats=numRepeats, outPath=outPath, xRange=xRange, 
+	
+	allClasssMeans<-runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
+		     maxIterations, repeats=numRepeats, outPath=outPath, xRange=xRange, 
                      outFileBase=paste(sampleName, regionName, sep="_"),
                      doIndividualPlots=FALSE)
+        saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
+
 	print("plotting clutering metrics for a range of class sizes")
 	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
-                       maxIterations, outPath, outFileBase)
+                       maxIterations, outPath, outFileBase, nThreads, setSeed)
     },
     error=function(e){"Matrix not valid"}
   ) 
