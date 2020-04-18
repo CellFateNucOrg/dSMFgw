@@ -1,6 +1,6 @@
+#########################
 ## EM clustering of single gene profiles
-####### Align bisulfite sequencing of genomeWide dSMF  to C elegans genome
-# date: 2010-01-10
+# date: 2020-04-18
 # author: Jennnifer Semple
 #
 # input required:
@@ -18,7 +18,8 @@
 
 suppressMessages(library(methMatrix))
 suppressMessages(library(EMclassifieR))
-
+suppressMessages(library(foreach))
+suppressMessages(library(doParallel))
 
 #####################
 # Custom functions
@@ -33,9 +34,10 @@ source('./R/variableSettings.R')
 # Variables
 ##############
 args = commandArgs(trailingOnly=TRUE)
-taskId=args[1]
-maxTasks=args[2]
-nThreads=args[3]
+taskId=as.numeric(args[1])
+maxTasks=as.numeric(args[2])
+nThreads=as.numeric(args[3])
+print(paste0("taskId:",taskId," maxTasks:",maxTasks," nThreads:",nThreads))
 
 options("scipen"=8, "digits"=4)
 options(device=pdf)
@@ -68,10 +70,6 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 
 matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-#TSSrelCoord<-convertGRtoRelCoord(ampTSS,1,anchorPoint="middle")
-#tssWinRelCoord<-convertGRtoRelCoord(ampTSS,winSize,anchorPoint="middle")
-
-#samples<-unique(allSampleRelCoordMats$sample)
 
 ################
 # learn classes for single gene
@@ -117,22 +115,30 @@ for (i in taskSubList[[taskId]]){
   print("dimensions of dataMatrix after NA row removal:  ")
   print(dim(dataMatrix))
   
-  tryCatch( 
-    {
-	print("running EM for a range of class sizes")
-	
+  allClassMeans<-tryCatch( {
+  	print("running EM for a range of class sizes")
 	allClasssMeans<-runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
-		     maxIterations, repeats=numRepeats, outPath=outPath, xRange=xRange, 
-                     outFileBase=paste(sampleName, regionName, sep="_"),
-                     doIndividualPlots=FALSE)
-        saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
+    			maxIterations, repeats=numRepeats, outPath=outPath, xRange=xRange, 
+			outFileBase=paste(sampleName, regionName, sep="_"),
+			doIndividualPlots=FALSE)
+  },
+   	error=function(e){"Matrix not valid"}
+  )
 
-	print("plotting clutering metrics for a range of class sizes")
+  if(is.list(dim(allClassMeans))){
+     	saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
+  } else {
+     	print(allClassMeans)
+  }
+	
+  clustMetrics<-tryCatch( {
+	print("plotting clustering metrics for a range of class sizes")
 	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
-                       maxIterations, outPath, outFileBase, nThreads, setSeed)
-    },
-    error=function(e){"Matrix not valid"}
-  ) 
+		maxIterations, outPath, outFileBase, nThreads, setSeed)
+  },
+  error=function(e){"Matrix not valid"}
+  )
+  print(clustMetrics)
 }
 
 

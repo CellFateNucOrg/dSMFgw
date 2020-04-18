@@ -1,9 +1,8 @@
 #! /bin/bash
-##SBATCH --mail-user=jennifer.semple@izb.unibe.ch
+#SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
 #SBATCH --job-name="dSMF_EMclust"
 #SBATCH --array=1-8
-#SBATCH --time=2-00:00:00
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=4G
