@@ -118,7 +118,7 @@ for (i in taskSubList[[taskId]]){
   allClassMeans<-tryCatch( {
   	print("running EM for a range of class sizes")
 	allClasssMeans<-runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
-    			maxIterations, repeats=numRepeats, outPath=outPath, xRange=xRange, 
+    			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
 			outFileBase=paste(sampleName, regionName, sep="_"),
 			doIndividualPlots=FALSE)
   },

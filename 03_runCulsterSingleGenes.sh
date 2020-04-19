@@ -6,6 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=4G
+#SBATCH --time=4-00:00:00
 
 module add vital-it
 module load R/3.6.1
