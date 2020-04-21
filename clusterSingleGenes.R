@@ -41,7 +41,7 @@ print(paste0("taskId:",taskId," maxTasks:",maxTasks," nThreads:",nThreads))
 
 options("scipen"=8, "digits"=4)
 options(device=pdf)
-
+options(warn=-1)
 
 # standard variables that should probably not be changed
 minConversionRate=0.8
@@ -125,7 +125,7 @@ for (i in taskSubList[[taskId]]){
    	error=function(e){"Matrix not valid"}
   )
 
-  if(is.list(dim(allClassMeans))){
+  if(is.list(allClassMeans)){
      	saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
   } else {
      	print(allClassMeans)
@@ -134,11 +134,14 @@ for (i in taskSubList[[taskId]]){
   clustMetrics<-tryCatch( {
 	print("plotting clustering metrics for a range of class sizes")
 	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
-		maxIterations, outPath, outFileBase, nThreads, setSeed)
+		maxIterations, outPath, outFileBase, EMrep=NULL, nThreads=nThreads, 
+		setSeed=setSeed)
   },
   error=function(e){"Matrix not valid"}
   )
+  if(length(clustMetrics)==1){
   print(clustMetrics)
+  }
 }
 
 
