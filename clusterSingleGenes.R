@@ -86,6 +86,8 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 outPath=paste0(path,"/EMres")
 setSeed=FALSE
+distMetric=list(name="cosineDist")
+
 
 if (!dir.exists(outPath)){
   dir.create(outPath)
@@ -117,10 +119,10 @@ for (i in taskSubList[[taskId]]){
   
   allClassMeans<-tryCatch( {
   	print("running EM for a range of class sizes")
-	allClasssMeans<-runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
+	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
     			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
 			outFileBase=paste(sampleName, regionName, sep="_"),
-			doIndividualPlots=FALSE)
+			doIndividualPlots=FALSE, distMetric=distMetric)
   },
    	error=function(e){"Matrix not valid"}
   )
@@ -135,13 +137,24 @@ for (i in taskSubList[[taskId]]){
 	print("plotting clustering metrics for a range of class sizes")
 	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
 		maxIterations, outPath, outFileBase, EMrep=NULL, nThreads=nThreads, 
-		setSeed=setSeed)
-  },
-  error=function(e){"Matrix not valid"}
+		setSeed=setSeed, distMetric=distMetric)
+    },
+    error=function(e){"Matrix not valid"}
   )
   if(length(clustMetrics)==1){
-  print(clustMetrics)
+  	print(clustMetrics)
   }
+
+  pcaPlots<-tryCatch( {
+   	print("plotting PCA of clusters")
+	plotPCAmatrices(k_range, outPath, outFileBase)
+    },
+    error=function(e){"Matrix not valid"}
+  )
+  if(length(pcaPlots)==1) {
+	print(pcaPlots)
+  }
+
 }
 
 
