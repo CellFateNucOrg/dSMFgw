@@ -147,12 +147,22 @@ for (i in taskSubList[[taskId]]){
 
   pcaPlots<-tryCatch( {
    	print("plotting PCA of clusters")
-	plotPCAmatrices(k_range, outPath, outFileBase)
+	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
     },
     error=function(e){"Matrix not valid"}
   )
   if(length(pcaPlots)==1) {
 	print(pcaPlots)
+  }
+
+  umapPlots<-tryCatch( {
+      print("plotting UMAP of clusters")
+      plotUMAPofMatrixClasses(k_range, outPath, outFileBase)
+    },
+    error=function(e){"Matrix not valid"}
+  )
+  if(length(umapPlots)==1) {
+    print(umapPlots)
   }
 
 }
