@@ -8,9 +8,10 @@ Pipeline for analysing genome-wide dSMF data. This pipeline aligns dSMF reads wi
 # installation instructions for bwa-meth. based on https://github.com/brentp/bwa-meth
 conda create --name bwaMeth python=3.7
 
-source activate bwaMeth
+conda activate bwaMeth
 
 pip install toolshed
+conda install -c bioconda samtools
 
 wget https://github.com/brentp/bwa-meth/archive/master.zip
 unzip master.zip
@@ -24,17 +25,7 @@ python setup.py install --user
 cp ~/.bashrc ~/.bashrc_backup
 echo "export BWAMETH=${HOME}/.local/bin/bwameth.py" >> ~/.bashrc
 
-# to be able to activate environments from inside a slurm script you need to add
-# the path to the activate script to .bashrc:
-export CONDA_ACTIVATE=/home/ubelix/izb/semple/anaconda3/bin/activate
-# then in the script use
-source $CONDA_ACTIVATE
-conda activate bwameth
-
-# Note: you must have samtools and bwa-mem modules activated
-
-#Before using it you must index the genome
-
+# Note: you must have bwa-mem module activated or install it separately
 
 #leave environment
 conda deactivate
@@ -42,16 +33,35 @@ conda deactivate
 
 ## Installing MethylDackel
 ```
-#conda create --name methyldackel python=3.7
-conda activate bwameth
+conda activate bwaMeth
 conda install -c bioconda methyldackel
-conda deactivate
 ````
 
-Note, this is only version 3.0.
-Compiling the dev version didn't seem to work but didn't give an error either:
+## Install bamUtil
+See info at: https://genome.sph.umich.edu/wiki/BamUtil#Building
+https://github.com/statgen/bamUtil
 ```
-module load /software/UHTS/Analysis/HTSlib/1.9;
+wget https://github.com/statgen/bamUtil/archive/master.tar.gz
+```
+Unzip it with tar -xzvf, then install in your local software directory (e.g.${HOME}/mySoftware/):
+```
+make cloneLib
+make
+make install INSTALLDIR=${HOME}/mySoftware/bamUtil
+```
+You will need to add the path of the executable to the varSettings.sh file
 
-make install CFLAGS="-O3 -Wall -I/software/UHTS/Analysis/HTSlib/1.9/include" LIBS="-L/software/UHTS/Analysis/HTSlib/1.9/lib" prefix=/home/ubelix/izb/semple/mySoftware/methyldackel
+## Install R libraries
+check the code at the beginning of 02_ script to see which libraries to install.
 
+## varSettings.sh
+most of what you have to change goes into the varSettings.sh file. An example file comes with the repository, copy it and change the name:
+```
+cp varSettings_example.sh varSettings.sh
+```
+Then use a text editor to change verSettings.sh
+
+The only other changes you will have to make is to the number of array jobs in 01_ script: The number of jobs should be the same as the number of libraries you sent to sequence.
+
+# Running the scripts
+run the scripts using that sbatch wrapper scripts 01_ and 02_ in the order indicated by the number

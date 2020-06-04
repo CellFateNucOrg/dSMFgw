@@ -66,8 +66,7 @@ if (genomeVer=="WS235") {
 
 # file with genomic ranges for amplicons. Must contain a metadata column called "ID" with a unique name for
 # each amplicon (e.g. gene name)
-#amplicons<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconGR.RDS')
-amplicons<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconGR.RDS')
+amplicons<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconGR.RDS')
 if (genomeVer=="WS235") {
   amplicons<-ucscToWbGR(amplicons)
 }
@@ -75,8 +74,7 @@ names(mcols(amplicons))[1]<-"ID"
 
 # file with genomic ranges for TSS (or other genomic feature). Must contain a metadata column called "ID" with a unique name for
 # each TSS (e.g. gene name). This ID should be the same as for the amplicons
-#ampTSS<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconMaxTSSgr.RDS')
-ampTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconMaxTSSgr.RDS')
+ampTSS<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconMaxTSSgr.RDS')
 if (genomeVer=="WS235") {
   ampTSS<-ucscToWbGR(ampTSS)
 }
@@ -84,16 +82,13 @@ names(mcols(ampTSS))[1]<-"ID"
 
 #files with TSS for gw alignments
 #highConfTSS where all three datasets agree on the TSS with the maxTSS (872 genes)
-#highConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_highConf_872.RDS')
-highConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_highConf_872.RDS')
+highConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_highConf_872.RDS')
 highConfTSS$ID<-names(highConfTSS)
 if (genomeVer!="WS235") {
     seqlevels(highConfTSS)<-paste0("chr",seqlevels(highConfTSS))
 }
-
 #lessConfTSS which are maxTSS from combining the three TSS datasets but were not identical (1955 genes)
-#lessConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_lessConf_1955.RDS')
-lessConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_lessConf_1955.RDS')
+lessConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_lessConf_1955.RDS')
 lessConfTSS$ID<-names(lessConfTSS)
 if (genomeVer!="WS235") {
     seqlevels(lessConfTSS)<-paste0("chr",seqlevels(lessConfTSS))
