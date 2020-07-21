@@ -50,7 +50,7 @@ ucscToWbGR<-function(ucscGR) {
   return(wbGR)
 }
 
-if (genomeVer=="WS235") {
+if (grep("^WS",genomeVer)) {
   genome<-ucscToWbGR(genome)
 }
 
