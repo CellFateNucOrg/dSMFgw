@@ -180,7 +180,7 @@ findNonOverlappingMotifs<-function(DNAss) {
   CGs$context<-"HCG"
 
   # reduce all the overlapping set to a smallest merged set
-  GCGCs<-GenomicRanges::reduce(GCGCs,ignore.strand=T)
+  GCGCs<-GenomicRanges::reduce(GCGCs, ignore.strand=T, min.gapwidth=0L)
   # then arbitrarily split them into non-overlapping GR 2-3 bp long
   GCGCs<-splitGCGCruns(GCGCs)
   GCGCs$context<-"GCGorCGC"
