@@ -52,20 +52,12 @@ genome<-Celegans
 #genomeVer="WS235"
 genomeVer<-getUnixVar("genomeVer")
 
-ucscToWbGR<-function(ucscGR) {
-  wbGR<-ucscGR
-  GenomeInfoDb::seqlevels(wbGR)<-gsub("chr","",GenomeInfoDb::seqlevels(wbGR))
-  GenomeInfoDb::seqlevels(wbGR)<-gsub("M","MtDNA",GenomeInfoDb::seqlevels(wbGR))
-  if(class(ucscGR)=="BSgenome") {
-    wbGR@provider<-"Wormbase"
-    wbGR@provider_version<-"WS235"
-  }
-  return(wbGR)
-}
 
 if (grep("^WS",genomeVer)) {
-  genome<-ucscToWbGR(genome)
+	GenomeInfoDb::seqlevelsStyle(genome)<-"Ensembl"
 }
+
+
 
 #genomeFile<-"/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
 
@@ -80,16 +72,16 @@ if (grep("^WS",genomeVer)) {
 # file with genomic ranges for amplicons. Must contain a metadata column called "ID" with a unique name for
 # each amplicon (e.g. gene name)
 amplicons<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconGR.RDS')
-if (genomeVer=="WS235") {
-  amplicons<-ucscToWbGR(amplicons)
+if (grep("^WS",genomeVer)) {
+  GenomeInfoDb::seqlevelsStyle(amplicons)<-"Ensembl"
 }
 names(mcols(amplicons))[1]<-"ID"
 
 # file with genomic ranges for TSS (or other genomic feature). Must contain a metadata column called "ID" with a unique name for
 # each TSS (e.g. gene name). This ID should be the same as for the amplicons
 ampTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconMaxTSSgr.RDS')
-if (genomeVer=="WS235") {
-  ampTSS<-ucscToWbGR(ampTSS)
+if (grep("^WS", genomeVer)) {
+  GenomeInfoDb::seqlevelsStyle(ampTSS)<-"Ensembl"
 }
 names(mcols(ampTSS))[1]<-"ID"
 
@@ -97,14 +89,18 @@ names(mcols(ampTSS))[1]<-"ID"
 #highConfTSS where all three datasets agree on the TSS with the maxTSS (872 genes)
 highConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_highConf_872.RDS')
 highConfTSS$ID<-names(highConfTSS)
-if (genomeVer!="WS235") {
-    seqlevels(highConfTSS)<-paste0("chr",seqlevels(highConfTSS))
+if (grep("^WS",genomeVer)) {
+  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"Ensembl"
+} else {
+  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"UCSC"
 }
 #lessConfTSS which are maxTSS from combining the three TSS datasets but were not identical (1955 genes)
 lessConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_lessConf_1955.RDS')
 lessConfTSS$ID<-names(lessConfTSS)
-if (genomeVer!="WS235") {
-    seqlevels(lessConfTSS)<-paste0("chr",seqlevels(lessConfTSS))
+if (grep("^WB",genomeVer)) {
+  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"Ensembl"
+} else {
+  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"UCSC"
 }
 
 
