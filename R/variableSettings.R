@@ -1,5 +1,7 @@
 # settings of some variables required by dSMFseqAnalysis1_amp_aln.R and dSMFseqAnalysis2_amp_XvA.R
 
+
+print("importing unix variables")
 # sourcing variables from varSettings.sh
 # number of threads you wish to use
 #threadNum=Sys.getenv("threadNum")
@@ -52,13 +54,12 @@ genome<-Celegans
 #genomeVer="WS235"
 genomeVer<-getUnixVar("genomeVer")
 
-
-if (grep("^WS",genomeVer)) {
+print(genomeVer)
+if (grepl("^WS",genomeVer)) {
 	GenomeInfoDb::seqlevelsStyle(genome)<-"Ensembl"
 }
 
-
-
+genomeFile="/home/ubelix/izb/bi18k694/genomeversion/ws270/c_elegans.PRJNA13758.WS270.genomic.fa"
 #genomeFile<-"/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
 
 
@@ -68,11 +69,11 @@ if (grep("^WS",genomeVer)) {
 #auxGenomeFile<-c("~/genomeVer/ecoli/Escherichia_coli.HUSEC2011CHR1.dna.fa", 
 #        "~/genomeVer/phiX/phiX.fasta", "~/genomeVer/lambda/lambdaPhage.fasta") 
 
-
+print("importing genomic ranges for amplicons")
 # file with genomic ranges for amplicons. Must contain a metadata column called "ID" with a unique name for
 # each amplicon (e.g. gene name)
 amplicons<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconGR.RDS')
-if (grep("^WS",genomeVer)) {
+if (grepl("^WS",genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(amplicons)<-"Ensembl"
 }
 names(mcols(amplicons))[1]<-"ID"
@@ -80,27 +81,30 @@ names(mcols(amplicons))[1]<-"ID"
 # file with genomic ranges for TSS (or other genomic feature). Must contain a metadata column called "ID" with a unique name for
 # each TSS (e.g. gene name). This ID should be the same as for the amplicons
 ampTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconMaxTSSgr.RDS')
-if (grep("^WS", genomeVer)) {
+if (grepl("^WS", genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(ampTSS)<-"Ensembl"
 }
 names(mcols(ampTSS))[1]<-"ID"
 
+print("importing genomic ranges for genome wide TSSs")
 #files with TSS for gw alignments
 #highConfTSS where all three datasets agree on the TSS with the maxTSS (872 genes)
 highConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_highConf_872.RDS')
 highConfTSS$ID<-names(highConfTSS)
-if (grep("^WS",genomeVer)) {
-  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"Ensembl"
-} else {
-  GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"UCSC"
-}
-#lessConfTSS which are maxTSS from combining the three TSS datasets but were not identical (1955 genes)
-lessConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_lessConf_1955.RDS')
-lessConfTSS$ID<-names(lessConfTSS)
-if (grep("^WB",genomeVer)) {
+if (grepl("^WS",genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"Ensembl"
 } else {
   GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"UCSC"
 }
 
+#lessConfTSS which are maxTSS from combining the three TSS datasets but were not identical (1955 genes)
+lessConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_lessConf_1955.RDS')
+lessConfTSS$ID<-names(lessConfTSS)
+if (grepl("^WB",genomeVer)) {
+  GenomeInfoDb::seqlevelsStyle(lessConfTSS)<-"Ensembl"
+} else {
+  GenomeInfoDb::seqlevelsStyle(lessConfTSS)<-"UCSC"
+}
+
+print("finished importing variables")
 
