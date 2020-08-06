@@ -70,14 +70,14 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 
 matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
-sampleName=unique(matTable$sample)[taskID]
+sampleName=unique(matTable$sample)[taskId]
 
 ###################################################
 # create multi gene matrix
 ###################################################
 multiGeneMat<-NULL
 #make multigene matrix from only one sample at a time
-for(i in 1:nrow(matTable[matTable$sample==sampleName])){
+for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
   regionName=matTable$region[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   dataMatrix<-readRDS(matTable$filename[i])
