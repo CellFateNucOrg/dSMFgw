@@ -168,7 +168,7 @@ allSampleMats<-getSingleMoleculeMatrices(sampleTable=fileList[taskID,], genomeFi
 
 
 #saveRDS(allSampleMats,paste0(path,"/rds/allSampleMats_",regionType,"_",seqDate,"_",expName,"_",
-		samples[taskID],".rds"))
+#		samples[taskID],".rds"))
 
 
 

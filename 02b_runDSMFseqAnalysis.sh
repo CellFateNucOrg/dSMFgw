@@ -3,7 +3,7 @@
 ##SBATCH --mail-type=end,fail
 #SBATCH --job-name="dSMF_singleMolecule"
 #SBATCH --time=4-00:00:00
-#SBATCH --array=1-4
+#SBATCH --array=1-15
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=12G
