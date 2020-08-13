@@ -10,4 +10,4 @@ dSMFseqAnalysis_2callCs_fromCluster.R
 *.txt
 varSettings.sh
 slurm*.out
-
+R/variableSettings.R

@@ -2,10 +2,10 @@
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
 #SBATCH --job-name="EMmulti"
-#SBATCH --array=1-3
+#SBATCH --array=1-15
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem-per-cpu=8G
 #SBATCH --time=4-00:00:00
 
 module add vital-it
