@@ -76,19 +76,22 @@ sampleName=unique(matTable$sample)[taskId]
 # create multi gene matrix
 ###################################################
 multiGeneMat<-NULL
+genesIncluded<-0
 #make multigene matrix from only one sample at a time
 for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
   regionName=matTable$region[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   dataMatrix<-readRDS(matTable$filename[i])
-  
+  # remove rows with too many NAs
+  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=0.2) 
+ 
   subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=50,
                                  addToReadName=outFileBase,
                                  preferBest=T)
   if(!is.null(subMatrix)){
     fullMatrix<-getFullMatrix(subMatrix)
     winMatrix<-prepareWindows(fullMatrix)
-  
+    genesIncluded<-genesIncluded+1
     if(is.null(multiGeneMat)){
       multiGeneMat<-winMatrix
     } else {
@@ -96,14 +99,15 @@ for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
     }
   }
 }
+print(paste(genesIncluded,"genes included in the multi gene matrix"))
 
-multiGeneMat<-rescale_minus1To1(multiGeneMat)
-multiGeneMat<-rescale_0To1(multiGeneMat)
+#multiGeneMat<-rescale_minus1To1(multiGeneMat)
+#multiGeneMat<-rescale_0To1(multiGeneMat)
 
 
 
 ################
-# learn classes for single gene
+# learn classes for multiple genes
 ################
 
 ################
@@ -115,7 +119,7 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-outPath=paste0(path,"/EMres_cosine_50reads")
+outPath=paste0(path,"/EMres_cosine_50reads_m1to1")
 setSeed=FALSE
 distMetric=list(name="cosineDist",rescale=T)
 
@@ -188,7 +192,8 @@ if(length(umapPlots)==1) {
   print(umapPlots)
 }
 
-
+print("plotting classes per gene")
+plotGenesPerClass(k_range, outPath, outFileBase)
 
 
 
