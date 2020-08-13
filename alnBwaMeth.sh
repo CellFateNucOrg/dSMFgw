@@ -263,7 +263,7 @@ fi # end of aligned
 source ${CONDA_ACTIVATE} bwaMeth
 
 mkdir -p methCalls
-mkdir -p perRead
+#mkdir -p perRead
 mkdir -p mbias
 
 if [[ "$dataType" = "gw" ]]
