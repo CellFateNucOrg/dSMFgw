@@ -86,7 +86,7 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 outPath=paste0(path,"/EMres")
 setSeed=FALSE
-distMetric=list(name="cosineDist")
+distMetric=list(name="cosineDist", rescale=T)
 
 
 if (!dir.exists(outPath)){
@@ -108,19 +108,19 @@ for (i in taskSubList[[taskId]]){
   regionName=matTable$region[i]
   sampleName=matTable$sample[i]
   outFileBase=paste(sampleName, regionName, sep="_")
-  print(paste("Clust", outFileBase))
+  print(paste("Clustering", outFileBase))
   dataMatrix<-readRDS(matTable[i, "filename"])
   # remove NAs
   print("dimensions of dataMatrix: ")
   print(dim(dataMatrix))
-  dataMatrix<-removeAllNArows(dataMatrix)
+  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=0.2)
   print("dimensions of dataMatrix after NA row removal:  ")
   print(dim(dataMatrix))
   
   allClassMeans<-tryCatch( {
   	print("running EM for a range of class sizes")
-	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
-    			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
+	runEMrangeClassNum(dataMatrix, k_range, convergenceError, maxIterations, 
+			EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
 			outFileBase=paste(sampleName, regionName, sep="_"),
 			doIndividualPlots=FALSE, distMetric=distMetric)
   },
