@@ -1,12 +1,14 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="EMmulti"
-#SBATCH --array=1-15
+#SBATCH --job-name="EMmulti_200reads"
+#SBATCH --array=1-3
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=4-00:00:00
+#SBATCH --output=slurm-%x-%j-%t.out
+#SBATCH --error=slurm-%x-%j-%t.out 
 
 module add vital-it
 module load R/3.6.1

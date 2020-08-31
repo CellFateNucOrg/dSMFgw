@@ -77,15 +77,16 @@ sampleName=unique(matTable$sample)[taskId]
 ###################################################
 multiGeneMat<-NULL
 genesIncluded<-0
+minReads<-200
 #make multigene matrix from only one sample at a time
 for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
   regionName=matTable$region[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   dataMatrix<-readRDS(matTable$filename[i])
   # remove rows with too many NAs
-  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=0.2) 
+  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=maxNAfraction) 
  
-  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=50,
+  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=minReads,
                                  addToReadName=outFileBase,
                                  preferBest=T)
   if(!is.null(subMatrix)){
@@ -119,7 +120,10 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-outPath=paste0(path,"/EMres_cosine_50reads_m1to1")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_maxNA01")
+outPath=paste0(path,"/EMres_cosine_200reads_m1to1")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
+#outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
 setSeed=FALSE
 distMetric=list(name="cosineDist",rescale=T)
 
@@ -173,7 +177,7 @@ if(length(clustMetrics)==1){
 
 pcaPlots<-tryCatch( {
  	print("plotting PCA of clusters")
-	plotPCAmatrices(k_range, outPath, outFileBase)
+	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
   },
   error=function(e){"Matrix not valid"}
 )
