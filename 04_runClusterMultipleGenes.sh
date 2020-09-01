@@ -7,8 +7,8 @@
 #SBATCH --partition=all
 #SBATCH --mem-per-cpu=8G
 #SBATCH --time=4-00:00:00
-#SBATCH --output=slurm-%x-%j-%t.out
-#SBATCH --error=slurm-%x-%j-%t.out 
+#SBATCH --output=slurm-%x-%A_%a.out
+#SBATCH --error=slurm-%x-%A_%a.out 
 
 module add vital-it
 module load R/3.6.1
