@@ -69,8 +69,10 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 
 
 matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
-
+head(matTable)
+matTable<-matTable[!is.na(matTable$filename),]
 sampleName=unique(matTable$sample)[taskId]
+print(sampleName)
 
 ###################################################
 # create multi gene matrix
@@ -119,7 +121,7 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-outPath=paste0(path,"/EMres_cosine_50reads_m1to1")
+outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
 setSeed=FALSE
 distMetric=list(name="cosineDist",rescale=T)
 
@@ -137,8 +139,8 @@ print(paste("Clustering", outFileBase))
 dataMatrix<-multiGeneMat
 dim(dataMatrix)
 
-set.seed(200413)
-
+#set.seed(200413) #rpt1
+set.seed(210820) #rpt2
 ################
 # process matrix
 ################
