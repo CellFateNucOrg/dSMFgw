@@ -79,15 +79,16 @@ print(sampleName)
 ###################################################
 multiGeneMat<-NULL
 genesIncluded<-0
+minReads<-200
 #make multigene matrix from only one sample at a time
 for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
   regionName=matTable$region[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   dataMatrix<-readRDS(matTable$filename[i])
   # remove rows with too many NAs
-  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=0.2) 
+  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=maxNAfraction) 
  
-  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=50,
+  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=minReads,
                                  addToReadName=outFileBase,
                                  preferBest=T)
   if(!is.null(subMatrix)){
@@ -175,7 +176,7 @@ if(length(clustMetrics)==1){
 
 pcaPlots<-tryCatch( {
  	print("plotting PCA of clusters")
-	plotPCAmatrices(k_range, outPath, outFileBase)
+	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
   },
   error=function(e){"Matrix not valid"}
 )
