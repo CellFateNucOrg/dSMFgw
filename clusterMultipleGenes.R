@@ -79,30 +79,30 @@ print(sampleName)
 ###################################################
 multiGeneMat<-NULL
 genesIncluded<-0
-minReads<-200
+minReads<-50
 #make multigene matrix from only one sample at a time
-for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
-  regionName=matTable$region[i]
-  outFileBase=paste(sampleName, regionName, sep="_")
-  dataMatrix<-readRDS(matTable$filename[i])
-  # remove rows with too many NAs
-  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=maxNAfraction) 
- 
-  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=minReads,
-                                 addToReadName=outFileBase,
-                                 preferBest=T)
-  if(!is.null(subMatrix)){
-    fullMatrix<-getFullMatrix(subMatrix)
-    winMatrix<-prepareWindows(fullMatrix)
-    genesIncluded<-genesIncluded+1
-    if(is.null(multiGeneMat)){
-      multiGeneMat<-winMatrix
-    } else {
-      multiGeneMat<-rbind(multiGeneMat,winMatrix)
-    }
-  }
-}
-print(paste(genesIncluded,"genes included in the multi gene matrix"))
+#for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
+#  regionName=matTable$region[i]
+#  outFileBase=paste(sampleName, regionName, sep="_")
+#  dataMatrix<-readRDS(matTable$filename[i])
+#  # remove rows with too many NAs
+#  dataMatrix<-removeNArows(dataMatrix, maxNAfraction=maxNAfraction) 
+# 
+#  subMatrix<-selectReadsFromMatrix(dataMatrix,minReads=minReads,
+#                                 addToReadName=outFileBase,
+#                                 preferBest=T)
+#  if(!is.null(subMatrix)){
+#    fullMatrix<-getFullMatrix(subMatrix)
+#    winMatrix<-prepareWindows(fullMatrix)
+#    genesIncluded<-genesIncluded+1
+#    if(is.null(multiGeneMat)){
+#      multiGeneMat<-winMatrix
+#    } else {
+#      multiGeneMat<-rbind(multiGeneMat,winMatrix)
+#    }
+#  }
+#}
+#print(paste(genesIncluded,"genes included in the multi gene matrix"))
 
 #multiGeneMat<-rescale_minus1To1(multiGeneMat)
 #multiGeneMat<-rescale_0To1(multiGeneMat)
@@ -122,7 +122,7 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
+outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt1")
 setSeed=FALSE
 distMetric=list(name="cosineDist",rescale=T)
 
@@ -140,39 +140,39 @@ print(paste("Clustering", outFileBase))
 dataMatrix<-multiGeneMat
 dim(dataMatrix)
 
-#set.seed(200413) #rpt1
-set.seed(210820) #rpt2
+set.seed(200413) #rpt1
+#set.seed(210820) #rpt2
 ################
 # process matrix
 ################
 
-allClassMeans<-tryCatch( {
-	print("running EM for a range of class sizes")
-	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
-  			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
-			outFileBase=paste(sampleName, regionName, sep="_"),
-			doIndividualPlots=FALSE, distMetric=distMetric)
-},
- 	error=function(e){"Matrix not valid"}
-)
-
-if(is.list(allClassMeans)){
-   	saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
-} else {
-   	print(allClassMeans)
-}
-	
-clustMetrics<-tryCatch( {
-	print("plotting clustering metrics for a range of class sizes")
-	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
-		maxIterations, outPath, outFileBase, EMrep=NULL, nThreads=nThreads, 
-		setSeed=setSeed, distMetric=distMetric)
-  },
-  error=function(e){"Matrix not valid"}
-)
-if(length(clustMetrics)==1){
-	print(clustMetrics)
-}
+#allClassMeans<-tryCatch( {
+#	print("running EM for a range of class sizes")
+#	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
+#  			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
+#			outFileBase=paste(sampleName, regionName, sep="_"),
+#			doIndividualPlots=FALSE, distMetric=distMetric)
+#},
+# 	error=function(e){"Matrix not valid"}
+#)
+#
+#if(is.list(allClassMeans)){
+#   	saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
+#} else {
+#   	print(allClassMeans)
+#}
+#	
+#clustMetrics<-tryCatch( {
+#	print("plotting clustering metrics for a range of class sizes")
+#	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
+#		maxIterations, outPath, outFileBase, EMrep=NULL, nThreads=nThreads, 
+#		setSeed=setSeed, distMetric=distMetric)
+#  },
+#  error=function(e){"Matrix not valid"}
+#)
+#if(length(clustMetrics)==1){
+#	print(clustMetrics)
+#}
 
 pcaPlots<-tryCatch( {
  	print("plotting PCA of clusters")
