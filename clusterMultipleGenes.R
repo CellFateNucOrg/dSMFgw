@@ -60,14 +60,14 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 #outPath=paste0(path,"/EMres_cosine_50reads_m1to1_maxNA01")
 #outPath=paste0(path,"/EMres_cosine_200reads_m1to1")
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt1")
+outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt1")
 #outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
-outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
+#outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
 #outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w25")
 #outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w30")
 setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
-#distMetric=list(name="cosineDist",rescale=T)
-distMetric=list(name="euclidean")
+distMetric=list(name="cosineDist",rescale=T)
+#distMetric=list(name="euclidean")
 
 set.seed(200413) # rpt1
 #set.seed(200908) # rpt2
@@ -92,7 +92,8 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 
 
 matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
-
+head(matTable)
+matTable<-matTable[!is.na(matTable$filename),]
 sampleName=unique(matTable$sample)[taskId]
 print(paste0("sampleName=",sampleNames))
 
@@ -137,6 +138,7 @@ print(paste(genesIncluded,"genes included in the multi gene matrix"))
 # learn classes for multiple genes
 ################
 
+
 if (!dir.exists(outPath)){
   dir.create(outPath)
 }
@@ -146,7 +148,6 @@ outFileBase=paste(sampleName, regionName, sep="_")
 print(paste("Clustering", outFileBase))
 dataMatrix<-multiGeneMat
 dim(dataMatrix)
-
 
 ################
 # process matrix
@@ -180,6 +181,7 @@ if(length(clustMetrics)==1){
 	print(clustMetrics)
 }
 
+
 pcaPlots<-tryCatch( {
  	print("plotting PCA of clusters")
 	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
@@ -189,6 +191,7 @@ pcaPlots<-tryCatch( {
 if(length(pcaPlots)==1) {
 	print(pcaPlots)
 }
+
 
 umapPlots<-tryCatch(
   {
