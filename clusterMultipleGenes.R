@@ -58,19 +58,26 @@ convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_maxNA01")
-#outPath=paste0(path,"/EMres_cosine_200reads_m1to1")
-outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt1")
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
-#outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w25")
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w30")
 setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
+
 distMetric=list(name="cosineDist",rescale=T)
 #distMetric=list(name="euclidean")
 
-set.seed(200413) # rpt1
-#set.seed(200908) # rpt2
+rndSeed=267413
+#rndSeed=181965
+set.seed(rndSeed)
+
+outPath=paste0(path,"/EM_",substr(distMetric$name,1,3),"_",minReads,"r_w",binSize,"_NA",maxNAfraction*100,"_",rndSeed)
+
+
+print(paste("outPath:", outPath))
+print(paste("winSize:", binSize))
+print(paste("maxNAfraction:", maxNAfraction))
+print(paste("minReads:", minReads))
+print(paste("distMetric:",distMetric$name))
+print(paste("randSeed:",rndSeed))
+
+
 
 ###################################################
 # load single read data centered on amplicon TSS
@@ -95,7 +102,7 @@ matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDa
 head(matTable)
 matTable<-matTable[!is.na(matTable$filename),]
 sampleName=unique(matTable$sample)[taskId]
-print(paste0("sampleName=",sampleNames))
+print(paste("sampleName:",sampleNames))
 
 matTable<-matTable[matTable$sample==sampleName,]
 
