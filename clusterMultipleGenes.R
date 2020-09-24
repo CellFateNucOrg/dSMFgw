@@ -47,7 +47,30 @@ options(warn=-1)
 minConversionRate=0.8
 maxNAfraction=0.2
 
+# parameters for multigeneMatrix generation
+minReads<-50 # number of reads sampled from each gene
+binSize<-20 # size of window used in multigene matrix
 
+# parameters for multigene clustering
+k_range = 2:8      # Number of classes to be found
+maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
+convergenceError = 10e-6
+numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
+xRange=c(-250,250)
+maxB=100 # Number of randomised matrices to generate
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_maxNA01")
+#outPath=paste0(path,"/EMres_cosine_200reads_m1to1")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt1")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
+outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w25")
+#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_w30")
+setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
+#distMetric=list(name="cosineDist",rescale=T)
+distMetric=list(name="euclidean")
+
+set.seed(200413) # rpt1
+#set.seed(200908) # rpt2
 
 ###################################################
 # load single read data centered on amplicon TSS
@@ -71,15 +94,18 @@ tssWin<-resize(tssWin,width=winSize,fix="center")
 matTable<-readRDS(paste0(path,"/rds/allSampleRelCoordMats_",regionType,"_",seqDate,"_",expName,".rds"))
 
 sampleName=unique(matTable$sample)[taskId]
+print(paste0("sampleName=",sampleNames))
+
+matTable<-matTable[matTable$sample==sampleName,]
 
 ###################################################
 # create multi gene matrix
 ###################################################
+
 multiGeneMat<-NULL
 genesIncluded<-0
-minReads<-200
 #make multigene matrix from only one sample at a time
-for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
+for(i in 1:nrow(matTable)){
   regionName=matTable$region[i]
   outFileBase=paste(sampleName, regionName, sep="_")
   dataMatrix<-readRDS(matTable$filename[i])
@@ -91,7 +117,7 @@ for(i in 1:nrow(matTable[matTable$sample==sampleName,])){
                                  preferBest=T)
   if(!is.null(subMatrix)){
     fullMatrix<-getFullMatrix(subMatrix)
-    winMatrix<-prepareWindows(fullMatrix)
+    winMatrix<-prepareWindows(fullMatrix, binSize=binSize)
     genesIncluded<-genesIncluded+1
     if(is.null(multiGeneMat)){
       multiGeneMat<-winMatrix
@@ -111,29 +137,9 @@ print(paste(genesIncluded,"genes included in the multi gene matrix"))
 # learn classes for multiple genes
 ################
 
-################
-# parameters
-################
-k_range = 2:8      # Number of classes to be found
-maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
-convergenceError = 10e-6
-numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
-xRange=c(-250,250)
-maxB=100 # Number of randomised matrices to generate
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_maxNA01")
-outPath=paste0(path,"/EMres_cosine_200reads_m1to1")
-#outPath=paste0(path,"/EMres_cosine_50reads_m1to1_rpt2")
-#outPath=paste0(path,"/EMres_euclid_50reads_m1to1")
-setSeed=FALSE
-distMetric=list(name="cosineDist",rescale=T)
-
-
 if (!dir.exists(outPath)){
   dir.create(outPath)
 }
-
-#split table indecies into nTasks number of groups
-#taskSubList<-split(1:nrow(matTable),sort(1:nrow(matTable)%%maxTasks))
 
 regionName="multiGene"
 outFileBase=paste(sampleName, regionName, sep="_")
@@ -141,7 +147,6 @@ print(paste("Clustering", outFileBase))
 dataMatrix<-multiGeneMat
 dim(dataMatrix)
 
-set.seed(200413)
 
 ################
 # process matrix
@@ -151,7 +156,7 @@ allClassMeans<-tryCatch( {
 	print("running EM for a range of class sizes")
 	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
   			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
-			outFileBase=paste(sampleName, regionName, sep="_"),
+			outFileBase=outFileBase,
 			doIndividualPlots=FALSE, distMetric=distMetric)
 },
  	error=function(e){"Matrix not valid"}
