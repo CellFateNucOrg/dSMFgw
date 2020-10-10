@@ -52,7 +52,7 @@ minReads<-50 # number of reads sampled from each gene
 binSize<-20 # size of window used in multigene matrix
 
 # parameters for multigene clustering
-k_range = 2:8      # Number of classes to be found
+k_range = 4:10      # Number of classes to be found
 maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
 convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
@@ -60,14 +60,16 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
 
-distMetric=list(name="cosineDist",rescale=T)
-#distMetric=list(name="euclidean")
+distMetric=list(name="cosineDist", valNA=0, rescale=F)
+#distMetric=list(name="cosineDist",rescale=T)
+#distMetric=list(name="canberraDist",rescale=T)
+#distMetric=list(name="euclidean", valNA=0.5, rescale=T)
 
 rndSeed=267413
 #rndSeed=181965
 set.seed(rndSeed)
 
-outPath=paste0(path,"/EM_",substr(distMetric$name,1,3),"_",minReads,"r_w",binSize,"_NA",maxNAfraction*100,"_",rndSeed)
+outPath=paste0(path,"/EM_",substr(distMetric$name,1,3),"_",minReads,"r_w",binSize,"_NA",maxNAfraction*100,"_",rndSeed,"_", ifelse(distMetric$rescale,"m1To1","0To1"),"_vNA",distMetric$valNA)
 
 
 print(paste("outPath:", outPath))

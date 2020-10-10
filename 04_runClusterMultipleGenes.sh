@@ -1,12 +1,12 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="EMm_rpt1"
+#SBATCH --job-name="EMm_cos01"
 #SBATCH --array=1-3
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all
-#SBATCH --mem-per-cpu=8G
-#SBATCH --time=3-00:00:00
+#SBATCH --mem-per-cpu=12G
+#SBATCH --time=1-00:00:00
 #SBATCH --output=slurm-%x-%A_%a.out
 #SBATCH --error=slurm-%x-%A_%a.out 
 
