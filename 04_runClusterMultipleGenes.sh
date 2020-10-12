@@ -1,7 +1,7 @@
 #! /bin/bash
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
-#SBATCH --job-name="EMm_cos01"
+#SBATCH --job-name="EMm_euc30"
 #SBATCH --array=1-3
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=all

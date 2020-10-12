@@ -37,6 +37,9 @@ args = commandArgs(trailingOnly=TRUE)
 taskId=as.numeric(args[1])
 maxTasks=as.numeric(args[2])
 nThreads=as.numeric(args[3])
+#nThreads=1
+#maxTasks=1
+#taskId=1
 print(paste0("taskId:",taskId," maxTasks:",maxTasks," nThreads:",nThreads))
 
 options("scipen"=8, "digits"=4)
@@ -45,11 +48,11 @@ options(warn=-1)
 
 # standard variables that should probably not be changed
 minConversionRate=0.8
-maxNAfraction=0.2
+maxNAfraction=0.05
 
 # parameters for multigeneMatrix generation
 minReads<-50 # number of reads sampled from each gene
-binSize<-20 # size of window used in multigene matrix
+binSize<-30 # size of window used in multigene matrix
 
 # parameters for multigene clustering
 k_range = 4:10      # Number of classes to be found
@@ -60,10 +63,10 @@ xRange=c(-250,250)
 maxB=100 # Number of randomised matrices to generate
 setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
 
-distMetric=list(name="cosineDist", valNA=0, rescale=F)
+#distMetric=list(name="cosineDist", valNA=0, rescale=F)
 #distMetric=list(name="cosineDist",rescale=T)
 #distMetric=list(name="canberraDist",rescale=T)
-#distMetric=list(name="euclidean", valNA=0.5, rescale=T)
+distMetric=list(name="euclidean", valNA=0.5, rescale=T)
 
 rndSeed=267413
 #rndSeed=181965
@@ -158,6 +161,14 @@ print(paste("Clustering", outFileBase))
 dataMatrix<-multiGeneMat
 dim(dataMatrix)
 
+#pdf(file=paste0("hist_w",binSize,"_NA",maxNAfraction,"_genes",genesIncluded,".pdf"), width=5.5, height=4)
+#hist(rowSums(is.na(dataMatrix)),main=paste0("binSize: ",binSize,", maxNA: ",maxNAfraction,
+#                                              ", genesIncluded:",genesIncluded),
+#     xlab="number of NA windows per molecule",xlim=c(0,500), col="grey80")
+#abline(v=mean(rowSums(is.na(dataMatrix))),lty=2,col="grey20")
+#dev.off()
+
+
 ################
 # process matrix
 ################
@@ -191,30 +202,30 @@ if(length(clustMetrics)==1){
 }
 
 
-pcaPlots<-tryCatch( {
- 	print("plotting PCA of clusters")
-	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
-  },
-  error=function(e){"Matrix not valid"}
-)
-if(length(pcaPlots)==1) {
-	print(pcaPlots)
-}
-
-
-umapPlots<-tryCatch(
-  {
-    print("plotting UMAP of clusters")
-    plotUMAPofMatrixClasses(k_range, outPath, outFileBase)
-  },
-  error=function(e){"Matrix not valid"}
-)
-if(length(umapPlots)==1) {
-  print(umapPlots)
-}
-
-print("plotting classes per gene")
-plotGenesPerClass(k_range, outPath, outFileBase)
+#pcaPlots<-tryCatch( {
+# 	print("plotting PCA of clusters")
+#	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
+#  },
+#  error=function(e){"Matrix not valid"}
+#)
+#if(length(pcaPlots)==1) {
+#	print(pcaPlots)
+#}
+#
+#
+#umapPlots<-tryCatch(
+#  {
+#    print("plotting UMAP of clusters")
+#    plotUMAPofMatrixClasses(k_range, outPath, outFileBase)
+#  },
+#  error=function(e){"Matrix not valid"}
+#)
+#if(length(umapPlots)==1) {
+#  print(umapPlots)
+#}
+#
+#print("plotting classes per gene")
+#plotGenesPerClass(k_range, outPath, outFileBase)
 
 
 
