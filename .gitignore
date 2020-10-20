@@ -11,3 +11,5 @@ dSMFseqAnalysis_2callCs_fromCluster.R
 varSettings.sh
 slurm*.out
 R/variableSettings.R
+EM*/
+hist*.pdf
