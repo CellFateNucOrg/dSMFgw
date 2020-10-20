@@ -48,33 +48,33 @@ options(warn=-1)
 
 # standard variables that should probably not be changed
 minConversionRate=0.8
-maxNAfraction=0.05
+maxNAfraction=0.2
 
 # parameters for multigeneMatrix generation
 minReads<-50 # number of reads sampled from each gene
 binSize<-30 # size of window used in multigene matrix
 
 # parameters for multigene clustering
-k_range = 4:10      # Number of classes to be found
-maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
-convergenceError = 10e-6
+#k_range = 4:10      # Number of classes to be found
+#maxIterations = 100 # number of iterations of EM clustering to perform if it does not converge
+#convergenceError = 10e-6
 numRepeats=10 # number of repeats of clustering each matrix (to account for fraction of methylation)
 xRange=c(-250,250)
-maxB=100 # Number of randomised matrices to generate
-setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
+#maxB=100 # Number of randomised matrices to generate
+#setSeed=FALSE # refers to seed within the functions, only necessary when doing automatic testing
 
 #distMetric=list(name="cosineDist", valNA=0, rescale=F)
 #distMetric=list(name="cosineDist",rescale=T)
 #distMetric=list(name="canberraDist",rescale=T)
-#distMetric=list(name="euclidean", valNA=0.5, rescale=T)
-distMetric=list(name="correlationDist", valNA=0.5, rescale=T)
+distMetric=list(name="euclidean", valNA=0.5, rescale=T)
+#distMetric=list(name="correlationDist", valNA=0.5, rescale=T)
 #distMetric=list(name="mutualInformation",valNA=0.5,rescale=F)
 
 rndSeed=267413
 #rndSeed=181965
 set.seed(rndSeed)
 
-outPath=paste0(path,"/EM_",substr(distMetric$name,1,3),"_",minReads,"r_w",binSize,"_NA",maxNAfraction*100,"_",rndSeed,"_", ifelse(distMetric$rescale,"m1To1","0To1"),"_vNA",distMetric$valNA)
+outPath=paste0(path,"/EMm_",substr(distMetric$name,1,3),"_",minReads,"r_w",binSize,"_NA",maxNAfraction*100,"_",rndSeed,"_", ifelse(distMetric$rescale,"m1To1","0To1"),"_vNA",distMetric$valNA)
 
 
 print(paste("outPath:", outPath))
@@ -149,8 +149,13 @@ print(paste(genesIncluded,"genes included in the multi gene matrix"))
 
 
 ################
-# learn classes for multiple genes
+# classify by known classes
 ################
+
+
+classes<-as.matrix(readRDS(paste0(path,"/classMeans_w30_euc.rds")))
+
+numClasses=nrow(classes)
 
 
 if (!dir.exists(outPath)){
@@ -175,59 +180,40 @@ dim(dataMatrix)
 # process matrix
 ################
 
-allClassMeans<-tryCatch( {
+dataOrderedByClass<-tryCatch( {
 	print("running EM for a range of class sizes")
-	runEMrangeClassNum(dataMatrix, k_range, convergenceError, 
-  			maxIterations, EMrepeats=numRepeats, outPath=outPath, xRange=xRange, 
-			outFileBase=outFileBase,
-			doIndividualPlots=FALSE, distMetric=distMetric)
+	runClassLikelihoodRpts(dataMatrix, classes,  numRepeats=numRepeats, 
+			outPath=outPath, xRange=xRange, 
+			outFileBase=outFileBase, distMetric=distMetric)
 },
  	error=function(e){"Matrix not valid"}
 )
 
-if(is.list(allClassMeans)){
-   	saveRDS(allClassMeans,paste0(outPath,"/allClassMeans_",outFileBase,".rds"))
-} else {
-   	print(allClassMeans)
-}
 	
-clustMetrics<-tryCatch( {
-	print("plotting clustering metrics for a range of class sizes")
-	plotClusteringMetrics(dataMatrix, k_range, maxB, convergenceError,
-		maxIterations, outPath, outFileBase, EMrep=NULL, nThreads=nThreads, 
-		setSeed=setSeed, distMetric=distMetric)
+pcaPlots<-tryCatch( {
+ 	print("plotting PCA of clusters")
+	plotPCAofMatrixClasses(c(numClasses), outPath, outFileBase)
   },
   error=function(e){"Matrix not valid"}
 )
-if(length(clustMetrics)==1){
-	print(clustMetrics)
+if(length(pcaPlots)==1) {
+	print(pcaPlots)
 }
 
 
-#pcaPlots<-tryCatch( {
-# 	print("plotting PCA of clusters")
-#	plotPCAofMatrixClasses(k_range, outPath, outFileBase)
-#  },
-#  error=function(e){"Matrix not valid"}
-#)
-#if(length(pcaPlots)==1) {
-#	print(pcaPlots)
-#}
-#
-#
-#umapPlots<-tryCatch(
-#  {
-#    print("plotting UMAP of clusters")
-#    plotUMAPofMatrixClasses(k_range, outPath, outFileBase)
-#  },
-#  error=function(e){"Matrix not valid"}
-#)
-#if(length(umapPlots)==1) {
-#  print(umapPlots)
-#}
-#
-#print("plotting classes per gene")
-#plotGenesPerClass(k_range, outPath, outFileBase)
+umapPlots<-tryCatch(
+  {
+    print("plotting UMAP of clusters")
+    plotUMAPofMatrixClasses(c(numClasses), outPath, outFileBase)
+  },
+  error=function(e){"Matrix not valid"}
+)
+if(length(umapPlots)==1) {
+  print(umapPlots)
+}
+
+print("plotting classes per gene")
+plotGenesPerClass(c(numClasses), outPath, outFileBase)
 
 
 
