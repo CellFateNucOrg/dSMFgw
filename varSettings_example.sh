@@ -21,7 +21,7 @@ expName=dSampchem
 
 # if script crashes or runs out of time you can avoid re-running cutadapt and trimmomatic by setting this to TRUE
 # normally this should be set to FALSE
-trimmed=TRUE
+trimmed=FALSE
 aligned=FALSE
 
 
