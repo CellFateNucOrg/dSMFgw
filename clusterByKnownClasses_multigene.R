@@ -184,7 +184,8 @@ dataOrderedByClass<-tryCatch( {
 	print("running EM for a range of class sizes")
 	runClassLikelihoodRpts(dataMatrix, classes,  numRepeats=numRepeats, 
 			outPath=outPath, xRange=xRange, 
-			outFileBase=outFileBase, distMetric=distMetric)
+			outFileBase=outFileBase, figFormat="pdf", 
+			distMetric=distMetric)
 },
  	error=function(e){"Matrix not valid"}
 )
