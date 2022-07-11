@@ -57,6 +57,7 @@ To install the following packages you will need [Bioconductor](https://www.bioco
 ```
 install.packages(c("RColorBrewer","GGally","gridExtra","dplyr","tidyr","ggpubr","foreach","doParallel")
 BiocManager::install(c("rtracklayer", "GenomicRanges"))
+devtools::install_github("jsemple19/grangesutils")
 devtools::install_github("jsemple19/methMatrix")
 devtools::install_github("jsemple19/EMclassifieR")
 ```
