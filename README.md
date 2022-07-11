@@ -52,11 +52,14 @@ make install INSTALLDIR=${HOME}/mySoftware/bamUtil
 You will need to add the path of the executable to the varSettings.sh file
 
 ## Install R libraries
-Check the code at the beginning of 02_ script to see which libraries to install.
-You need to install the methMatrix library from github as follows:
-```
-devtools::install_github("jsemple19/methMatrix")
+To install the following packages you will need [Bioconductor](https://www.bioconductor.org/install/) and [devtools](https://www.rdocumentation.org/packages/devtools/versions/2.4.3) installed.
 
+```
+install.packages(c("RColorBrewer","GGally","gridExtra","dplyr","tidyr","ggpubr","foreach","doParallel")
+BiocManager::install(c("rtracklayer", "GenomicRanges"))
+devtools::install_github("jsemple19/methMatrix")
+devtools::install_github("jsemple19/EMclassifieR")
+```
 
 ## varSettings.sh
 most of what you have to change goes into the varSettings.sh file. An example file comes with the repository, copy it and change the name:
