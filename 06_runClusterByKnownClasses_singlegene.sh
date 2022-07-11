@@ -2,9 +2,9 @@
 #SBATCH --mail-user=jennifer.semple@izb.unibe.ch
 #SBATCH --mail-type=end,fail
 #SBATCH --job-name="EMs_euc"
-#SBATCH --array=1-3
+#SBATCH --array=1
 #SBATCH --cpus-per-task=2
-#SBATCH --partition=all
+#SBATCH --partition=epyc2
 #SBATCH --mem-per-cpu=12G
 #SBATCH --time=1-00:00:00
 #SBATCH --output=slurm-%x-%A_%a.out

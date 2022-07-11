@@ -1,5 +1,6 @@
 # settings of some variables required by dSMFseqAnalysis1_amp_aln.R and dSMFseqAnalysis2_amp_XvA.R
-
+genomeBaseDir="/storage/homefs/semple/genomeVer"
+ampliconDataDir="/storage/workspaces/izb_meister/izb_meister1/dSMF/usefulObjects"
 
 print("importing unix variables")
 # sourcing variables from varSettings.sh
@@ -60,7 +61,7 @@ if (grepl("^WS",genomeVer)) {
 }
 
 #genomeFile="/home/ubelix/izb/bi18k694/genomeversion/ws270/c_elegans.PRJNA13758.WS270.genomic.fa"
-genomeFile<-"/home/ubelix/izb/semple/genomeVer/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa"
+genomeFile<-paste0(genomeBaseDir,"/ws260/sequence/c_elegans.PRJNA13758.WS260.genomic.fa")
 
 
 #load secondary genome to which you wish to align sequences and store it under the geneirc "auxGenome" variable
@@ -73,7 +74,8 @@ print("importing genomic ranges for amplicons")
 # file with genomic ranges for amplicons. Must contain a metadata column called "ID" with a unique name for
 # each amplicon (e.g. gene name)
 #amplicons<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconGR.RDS')
-amplicons<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconGR.RDS')
+#amplicons<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconGR.RDS')
+amplicons<-readRDS(paste0(ampliconDataDir,"/ampliconGR.RDS"))
 if (grepl("^WS",genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(amplicons)<-"Ensembl"
 }
@@ -82,7 +84,8 @@ names(mcols(amplicons))[1]<-"ID"
 # file with genomic ranges for TSS (or other genomic feature). Must contain a metadata column called "ID" with a unique name for
 # each TSS (e.g. gene name). This ID should be the same as for the amplicons
 #ampTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ampliconMaxTSSgr.RDS')
-ampTSS<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconMaxTSSgr.RDS')
+#ampTSS<-readRDS('/home/ubelix/izb/semple/myData/usefulObjects/ampliconMaxTSSgr.RDS')
+ampTSS<-readRDS(paste0(ampliconDataDir,"/ampliconMaxTSSgr.RDS"))
 if (grepl("^WS", genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(ampTSS)<-"Ensembl"
 }
@@ -92,7 +95,7 @@ print("importing genomic ranges for genome wide TSSs")
 #files with TSS for gw alignments
 #highConfTSS where all three datasets agree on the TSS with the maxTSS (872 genes)
 #highConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_highConf_872.RDS')
-highConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_highConf_872.RDS')
+highConfTSS<-readRDS(paste0(genomeBaseDir,"/ws260/rds/ChenKreusSaitoTSS_highConf_872.RDS"))
 highConfTSS$ID<-names(highConfTSS)
 if (grepl("^WS",genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(highConfTSS)<-"Ensembl"
@@ -101,7 +104,7 @@ if (grepl("^WS",genomeVer)) {
 }
 
 #lessConfTSS which are maxTSS from combining the three TSS datasets but were not identical (1955 genes)#lessConfTSS<-readRDS('/home/ubelix/izb/bi18k694/usefulfiles/ChenKreusSaitoTSS_lessConf_1955.RDS')
-lessConfTSS<-readRDS('/home/ubelix/izb/semple/genomeVer/ws260/rds/ChenKreusSaitoTSS_lessConf_1955.RDS')
+lessConfTSS<-readRDS(paste0(genomeBaseDir,"/ws260/rds/ChenKreusSaitoTSS_lessConf_1955.RDS"))
 lessConfTSS$ID<-names(lessConfTSS)
 if (grepl("^WB",genomeVer)) {
   GenomeInfoDb::seqlevelsStyle(lessConfTSS)<-"Ensembl"
