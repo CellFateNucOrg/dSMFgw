@@ -123,7 +123,7 @@ matTable<-matTable[matTable$sample==sampleName,]
 ################
 
 
-classes<-as.matrix(readRDS(paste0(path,"/classMeans_w30_euc.rds")))
+classes<-as.matrix(readRDS(paste0(path,"/classMeans_w30_euc_sort.rds")))
 
 numClasses=nrow(classes)
 
