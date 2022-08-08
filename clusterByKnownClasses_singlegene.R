@@ -70,6 +70,7 @@ distMetric=list(name="euclidean", valNA=0.5, rescale=T)
 #distMetric=list(name="correlationDist", valNA=0.5, rescale=T)
 #distMetric=list(name="mutualInformation",valNA=0.5,rescale=F)
 
+
 rndSeed=267413
 #rndSeed=181965
 set.seed(rndSeed)
@@ -126,7 +127,8 @@ matTable<-matTable[matTable$sample==sampleName,]
 classes<-as.matrix(readRDS(paste0(path,"/classMeans_w30_euc_sort.rds")))
 
 numClasses=nrow(classes)
-
+#classesToPlot=NULL # use this if you want to plot all classes
+classesToPlot=2:9 # uses all classes for classification but only plots classes 2:9
 
 if (!dir.exists(outPath)){
   dir.create(outPath)
@@ -147,7 +149,8 @@ for(i in 1:nrow(matTable)){
 	print("EM clustering by known classes")
 	runClassLikelihoodRpts(dataMatrix, classes,  numRepeats=numRepeats, 
 			outPath=outPath, xRange=xRange, 
-			outFileBase=outFileBase, distMetric=distMetric)
+			outFileBase=outFileBase, distMetric=distMetric,
+			classesToPlot=classesToPlot)
   },
  	error=function(e){"Matrix not valid"}
   )
